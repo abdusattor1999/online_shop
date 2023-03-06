@@ -22,6 +22,14 @@ CORS_ALLOWED_ORIGINS = [
     ".pythonanywhere.com",
 ]
 
+ALLOWED_HOSTS = [
+    "abdusattor0707.pythonanywhere.com",
+    "http://127.0.0.1:3000",
+    ".pythonanywhere.com",
+]
+
+
+
 APPEND_SLASH=False
 
 
