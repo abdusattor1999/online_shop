@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import User, Profile, Address, Cofirmation, ProfilePictures
+from .models import User, Profile, Address, Cofirmation, ProfilePictures, UploadFile
 
 
 
@@ -45,3 +45,4 @@ class ProfileAdmin(admin.ModelAdmin):
     list_display = ("first_name","last_name","user","email","created_time")
 
 admin.site.register(ProfilePictures)
+admin.site.register(UploadFile)

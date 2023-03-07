@@ -61,10 +61,9 @@ class VerifyView(APIView):
         data = request.data
 
         qs = Cofirmation.objects.filter(user__phone=data['phone'])
-
         if qs.exists():
             obj = qs.last()
-            if obj.code != code:
+            if obj.code != str(code):
                 data = {
                     "success":False,
                     "message":"Noto'g'ri kod kiritildi"
@@ -135,40 +134,56 @@ class CreateProfileView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid()
         user = self.request.user
-        photo = serializer.data.get('photo', None)
-        first_name = serializer.data.get('first_name', None)
-        last_name = serializer.data.get('last_name', None)
-        email = serializer.data.get("email", None)
-        
-        if photo is not None:
-            image = UploadFile.objects.filter(id=photo)
-            if image:
-                ProfilePictures.objects.create(
-                    instance_id = self.profile.profile_picture,
-                    image_id = image.id
-                )
-            else:
-                return Response(
-                    {"success":False,"message":"Rasm yuklanmagan"}
-                )
+        images = self.request.data.get('images', None)
+        first_name = self.request.data.get('first_name', None)
+        last_name = self.request.data.get('last_name', None)
+        email = self.request.data.get("email", None)
 
+
+        is_images = False
         user_exists = Profile.objects.filter(user=user).exists()
         
         if user_exists:
             raise ValueError({"success":False, "message":"Bu foydalanuvchi profili mavjud !"})
         else:
-            user = Profile.objects.create(
+            profile = Profile.objects.create(
                 user_id=user.id,
                 first_name=first_name,
                 last_name=last_name,
                 email=email
             )
-            user.set_photo(photo)       
+
+        def validate_image(images):
+            response = self.request.data.get("images", None)
+            if response is None:
+                raise Response({
+                    "success":False, "message":"Rasm yuklanmagan"
+                })
+            return True
+
+        if request.data.get('images', None):
+            validate_image(images=is_images)
+            is_images = True
+        
+        if images is not None:
+            image = UploadFile.objects.filter(id=images[-1])
+            if image:
+                ProfilePictures.objects.create(
+                    instance_id = profile.id,
+                    image_id = images[-1]
+                )   
+            else:   
+                return Response(
+                    {"success":False,"message":"Rasm yuklanmagan"}
+                )
+            if is_images:
+                profile.set_image(images=images)
+            # user.set_photo(photo)       
 
         data = {
             'success':True,
             'message':"Profil malumotlari saqlandi",
-            "data":user
+            "data":Profile
         }
         return Response(data)
 

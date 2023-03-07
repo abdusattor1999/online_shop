@@ -64,7 +64,7 @@ class Cofirmation(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user')
-    photo = models.ForeignKey('account.ProfilePictures', verbose_name="Profil rasmi", blank=True, null=True, on_delete=models.CASCADE, related_name="profile_picture")
+    # photo = models.ForeignKey('account.ProfilePictures', verbose_name="Profil rasmi", blank=True, null=True, on_delete=models.CASCADE, related_name="profile_picture")
     first_name = models.CharField(max_length=50, verbose_name="Ism", blank=True, null=True)
     last_name = models.CharField(max_length=50, verbose_name="Familiya", blank=True, null=True)
     email = models.EmailField(max_length=120, null=True, blank=True, verbose_name="Email")
@@ -76,20 +76,30 @@ class Profile(models.Model):
     
     @property
     def photo(self):
+        # get user images
         qs = ProfilePictures.objects.filter(instance_id=self.id)
         if qs.exists():
             obj = qs.latest('id')
             return {"id": obj.image.id, "url": obj.image.url}
         else:
             return None
-        return
+    
+    def set_image(self, images:list):
+        # set image for user
+        print(type(images))
+        for image_id in images:
+            ProfilePictures.objects.create(instance_id=self.id, image_id=image_id)
+
+    def update_image(self, images: list):
+        # update image for user
+        pass
 
 
-    def set_photo(self, photo_id):
-        object = ProfilePictures.objects.filter(instance_id=self.id)
-        object.photo_id = photo_id
-        object.save()
-        return True
+    # def set_photo(self, photo_id):
+    #     object = ProfilePictures.objects.filter(instance_id=self.id)
+    #     object.photo_id = photo_id
+    #     object.save()
+    #     return True
 
 
 class UploadFile(models.Model):
@@ -107,7 +117,7 @@ class UploadFile(models.Model):
     
 
 class ProfilePictures(models.Model):
-    instance = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="profile_picture")
+    instance = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="profile")
     image = models.ForeignKey(UploadFile, on_delete=models.CASCADE)
 
     def __str__(self):
