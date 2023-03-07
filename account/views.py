@@ -132,38 +132,34 @@ class CreateProfileView(APIView):
                 last_name=last_name,
                 email=email
             )
-
         def validate_image(images):
-            response = self.request.data.get("images", None)
-            if response is None:
+            if images is None:
                 raise Response({
-                    "success":False, "message":"Rasm yuklanmagan"
+                    "success":False, "message":"Rasm yuklashda xatolik"
                 })
             return True
 
         if request.data.get('images', None):
-            validate_image(images=is_images)
+            validate_image(images=request.data.get('images', None))
             is_images = True
         
+
         if images is not None:
-            image = UploadFile.objects.filter(id=images[-1])
-            if image:
-                ProfilePictures.objects.create(
-                    instance_id = profile.id,
-                    image_id = images[-1]
-                )   
+            file = UploadFile.objects.filter(id=images[0])
+            if file.last() is not None:
+                print(153)
+                profile.set_image(images) 
+                print(155)
             else:   
                 return Response(
-                    {"success":False,"message":"Rasm yuklanmagan"}
+                    {"success":False,"message":"Bunday rasm yuklanmagan"}
                 )
             if is_images:
                 profile.set_image(images=images)
-            # user.set_photo(photo)       
 
         data = {
             'success':True,
             'message':"Profil malumotlari saqlandi",
-            "data":Profile
         }
         return Response(data)
 

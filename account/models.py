@@ -86,7 +86,6 @@ class Profile(models.Model):
     
     def set_image(self, images:list):
         # set image for user
-        print(type(images))
         for image_id in images:
             ProfilePictures.objects.create(instance_id=self.id, image_id=image_id)
 
@@ -98,7 +97,7 @@ class Profile(models.Model):
 
 
 class UploadFile(models.Model):
-    file = models.FileField(upload_to='upload/')
+    file = models.FileField(upload_to='static/uploads/')
 
     def __str__(self):
         return str(self.id)
