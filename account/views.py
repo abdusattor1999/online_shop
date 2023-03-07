@@ -147,9 +147,7 @@ class CreateProfileView(APIView):
         if images is not None:
             file = UploadFile.objects.filter(id=images[0])
             if file.last() is not None:
-                print(153)
                 profile.set_image(images) 
-                print(155)
             else:   
                 return Response(
                     {"success":False,"message":"Bunday rasm yuklanmagan"}
