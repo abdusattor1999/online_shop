@@ -19,14 +19,16 @@ AUTH_USER_MODEL = 'account.User'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://e-commerce-apezon.vercel.app/"
+    "https://e-commerce-apezon.vercel.app",
+    "e-commerce-apezon.vercel.app"
 ]
 
 ALLOWED_HOSTS = [
     "abdusattor0707.pythonanywhere.com",
     "http://127.0.0.1:3000",
     "127.0.0.1",
-    "https://e-commerce-apezon.vercel.app/"
+    "https://e-commerce-apezon.vercel.app",
+    "e-commerce-apezon.vercel.app",
 ]
 
 
