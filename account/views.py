@@ -105,26 +105,6 @@ class UploadImageApiView(CreateAPIView):
             return Response({"success": False, "message": str(e.args)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# 2 - ProfilePictures modelida obyekt hosil qilib obyektni qaytaramiz 
-# class ProfilePicView(APIView):
-#     serializer_class = ProfilePicSerializer
-#     permission_classes = (IsAuthenticated,)
-#     def post(self, request):
-#         serializer = self.serializer_class(data=request.data)
-#         if serializer.is_valid():
-#             user = self.request.get['user']
-#             user = user
-            
-#             data = {
-#                 "success":True,
-#                 "message":"Rasm saqlandi",
-#                 "results":image
-#             }
-#             return Response(data)
-#         else:
-#             return Response({"success":False, "message":"Rasm yuklash bajarilmadi"})
-
-
 
 class CreateProfileView(APIView):
     permission_classes = (IsAuthenticated,)

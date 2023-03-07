@@ -95,11 +95,6 @@ class Profile(models.Model):
         pass
 
 
-    # def set_photo(self, photo_id):
-    #     object = ProfilePictures.objects.filter(instance_id=self.id)
-    #     object.photo_id = photo_id
-    #     object.save()
-    #     return True
 
 
 class UploadFile(models.Model):
