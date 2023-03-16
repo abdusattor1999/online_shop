@@ -35,7 +35,7 @@ class User(AbstractBaseUser,PermissionsMixin):
 
     objects = CustomUserManager()
 
-    def edit_phone(self, phone):   
+    def edit_phone(self):   
         code = "".join(str(randrange(0,10)) for _ in range(6))
         Cofirmation.objects.create(
         type="change_phone",
@@ -44,8 +44,6 @@ class User(AbstractBaseUser,PermissionsMixin):
         expiration_time=timezone.now() + timezone.timedelta(minutes=3)
         )
         self.is_active = False
-        self.phone = phone
-
         try:
             send_code(code)
         except:

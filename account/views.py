@@ -58,10 +58,14 @@ class VerifyView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request, *args, **kwargs):
+        phone = self.request.data.get("phone", None)
+        new_phone = self.request.data.get("new_phone", None)
         code = self.request.data.get('code', None)
         type = self.request.data.get("type", None)
-
-        qs = Cofirmation.objects.filter(user__phone=self.request.data['phone'], expiration_time__gte = timezone.now())
+        lists = [phone, new_phone, code, type]
+        if None in lists and type == "change_phone":
+            return Response({"success":False, "message":f"Hamma malumotlar berilmadi \nKerakli malumotlar:{lists}"})
+        qs = Cofirmation.objects.filter(user__phone=phone, expiration_time__gte=timezone.now())
         obj = qs.last()
         
         # kod muddati tugamagan obyekt bor bo'lsa
@@ -75,6 +79,11 @@ class VerifyView(APIView):
             obj.activate()
             
             if type == "change_phone":
+                user = User.objects.filter(phone=phone).last()
+                user.phone=new_phone
+                user.is_active=True
+                user.save()
+
                 text = "Kod tasdiqlandi. Telefon raqamni yangilash muvaffaqiyatli"
             elif type == "password_reset":
                 text = "Kod tasdiqlandi. Parol tiklashga ruxsat berildi"
@@ -124,11 +133,8 @@ class ChangePhoneView(APIView):
         if serializer.is_valid():
             user = self.request.user
             phone = serializer.validated_data['new_phone']
-
             self.validate_phone_number(phone)
-
-            user.edit_phone(phone)
-            user.save()
+            user.edit_phone()
             return Response({"success":True, 'message': "Telefon Raqam yangiash so'rovi yuborildi kodni tasdiqlang !"}, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
