@@ -1,11 +1,15 @@
 from django.shortcuts import render
-
+from .utils import send_code
 # Create your views here.
 from rest_framework.exceptions import ValidationError
 from .serializers import (
-    SignupSerializer, LogoutSerializer, 
-    UploadImageSerializer, CreateProfileSerializer,  ProfilePicSerializer
+    SignupSerializer, LogoutSerializer, ChangePasswordSerializer,
+    UploadImageSerializer, CreateProfileSerializer,  ProfilePicSerializer,
+    ChangePhoneSerializer, DeleteUserSerilizer
     )
+from random import randrange
+from datetime import datetime, timedelta
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView, CreateAPIView
 from .models import User, Profile, Cofirmation, Address, ProfilePictures, UploadFile
@@ -13,8 +17,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, generics
 import re
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import UploadFile, ProfilePictures
 
 
@@ -40,14 +42,13 @@ class SignupView(APIView):
     def post(self, request, *args, **kwargs):
         phone = self.request.data.get('phone', None)
         self.validate_phone_number(phone=phone)
-        user = self.request.user
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         data = {
             'success':True,
-            'message':"Arizangiz qabul qilindi. Kodni tasdiqlang !!!"
+            'message':"Ro'yxatdan o'tish uchun arizangiz qabul qilindi. Kodni tasdiqlang !!!"
         }
         return Response(data)
     
@@ -58,11 +59,13 @@ class VerifyView(APIView):
 
     def post(self, request, *args, **kwargs):
         code = self.request.data.get('code', None)
-        data = request.data
+        type = self.request.data.get("type", None)
 
-        qs = Cofirmation.objects.filter(user__phone=data['phone'])
+        qs = Cofirmation.objects.filter(user__phone=self.request.data['phone'], expiration_time__gte = timezone.now())
+        obj = qs.last()
+        
+        # kod muddati tugamagan obyekt bor bo'lsa
         if qs.exists():
-            obj = qs.last()
             if obj.code != str(code):
                 data = {
                     "success":False,
@@ -71,9 +74,22 @@ class VerifyView(APIView):
                 return Response(data)
             obj.activate()
             
-            return Response({"success": True, "message":"Kod tasdiqlandi. Ro'yxatdan o'tish muvaffaqiyatli"})
+            if type == "change_phone":
+                text = "Kod tasdiqlandi. Telefon raqamni yangilash muvaffaqiyatli"
+            elif type == "password_reset":
+                text = "Kod tasdiqlandi. Parol tiklashga ruxsat berildi"
+            else:  # resend and register
+                text = "Kod tasdiqlandi. Ro'yxatdan o'tish muvaffaqiyatli"
+            
+            return Response({"success": True, "message":text})
         else:
-            return Response({"success": False, "message":"Telefon raqami xato"}, status=status.HTTP_404_NOT_FOUND)
+            if Cofirmation.objects.filter(user__phone=self.request.data['phone']):
+                response = {"success":False, "message":"Kod muddati o'tgan davom etish uchun kodni qayta yuboring"}
+                return Response(response)
+            else:
+                response = {"success": False, "message":"Telefon raqami xato"}
+                return Response(response, status=status.HTTP_404_NOT_FOUND)
+
 
 
 class LoguotView(generics.GenericAPIView):
@@ -84,14 +100,171 @@ class LoguotView(generics.GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-
+                    
         return Response({"success":True, "message":"Tizimdan chiqish muvaffaqiyatli !"}, status=status.HTTP_204_NO_CONTENT)
+                       
+
+
+class ChangePhoneView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def validate_phone_number(self, phone):
+        pattern = re.compile(r"^[\+]?[(]?[9]{2}?[8]{1}[)]?[-\s\.]?[0-9]{2}[-\s\.]?[0-9]{7}$")
+        if not pattern.match(phone):
+            data = {
+                "success":False,
+                "message":"Yangi telefon raqami to'g'ri kiritilmadi."
+            }
+            raise ValidationError(data)
+        print('Validatsiya Muvaffaqiyatli !')
+        return True
+
+    def put(self, request):
+        serializer = ChangePhoneSerializer(data=request.data)
+        if serializer.is_valid():
+            user = self.request.user
+            phone = serializer.validated_data['new_phone']
+
+            self.validate_phone_number(phone)
+
+            user.edit_phone(phone)
+            user.save()
+            return Response({"success":True, 'message': "Telefon Raqam yangiash so'rovi yuborildi kodni tasdiqlang !"}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class ChangePasswordView(generics.UpdateAPIView):
+    serializer_class = ChangePasswordSerializer
+    model = User
+    permission_classes = (IsAuthenticated,)
+
+
+    def update(self, request, *args, **kwargs):
+        self.object = self.request.user
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+
+            if not self.object.check_password(serializer.data.get("old_password")):
+                return Response({"success":False, "message":"Parol noto'g'ri"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            self.object.set_password(serializer.data.get("new_password"))
+            self.object.save()
+            response = {
+                'success':True,
+                'message':'Parol yangilash muvaffaqiyatli bajarildi',
+                'status': status.HTTP_200_OK,
+            }
+
+            return Response(response)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class DeleteUserView(generics.DestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = DeleteUserSerilizer
+    permission_classes = IsAuthenticated,
+
+    def delete(self, request, *args, **kwargs):
+        self.destroy(request, *args, **kwargs)
+        return Response({"success":True, "message":"Foydalanuvchi hisobi o'chirildi"})
+
+
+class ResetPassRequestView(APIView):
+    permission_classes = AllowAny,
+
+    def post(self, request, *args, **kwargs):
+        phone = self.request.data.get('phone', None)
+        qs = User.objects.filter(phone=phone)
+        user = qs.last()
+        if qs.exists():        
+            code = "".join(str(randrange(0,10)) for _ in range(6))
+            Cofirmation.objects.create(
+                type="password_reset",
+                user_id = user.id,
+                code=code,
+                expiration_time=timezone.now() + timezone.timedelta(minutes=3)
+            )
+            send_code(code)
+            data = {
+                "success":True,
+                "message":"Parolni tiklash arizasi qabul qilindi kodni tasdiqlang !"
+            }
+            return Response(data=data)
+        else:
+            data = {"success":False, "message":"Bunday foydalanuvchi mavjud emas"}
+            raise Response(data)
+
+class ResetPassConfirm(APIView):
+    permission_classes = AllowAny,
+
+    def post(self, request):
+        phone = self.request.data.get("phone")
+        password = self.request.data.get("password")
+        password2 = self.request.data.get("password2")
+        user = User.objects.filter(phone=phone).last()
+        
+        if password == password2:
+            user.set_password(password)
+            user.save()
+            response = {"success" : True, "message" : "Parol yangilandi"}
+        else:
+            response = {"success":False, "message" : "Parollar bir biriga mos emas !"}
+        return Response(response)           
+
+
+class ResendCodeView(APIView):
+    permission_classes = AllowAny,
     
+    def post(self, request, *args, **kwargs):
+        phone = self.request.data.get("phone")
+        type = self.request.data.get("type")
+        
+        if phone is None or type is None:
+            return Response({"message":"Ma'lumot to'liq kiritilmadi! \n\Kerakli ma'lmotlar: ['phone', 'type']"})
+        
+        userqs = User.objects.filter(phone=phone)
+        if userqs.exists():
+            user = userqs.last()
+            
+            old_obj = Cofirmation.objects.filter(user__phone=phone, expiration_time__lte = timezone.now()) 
+            if old_obj.exists():
+                oob = old_obj.last()
+                oob.delete()
+
+            qs = Cofirmation.objects.filter(user__phone=phone, type=type, expiration_time__gte = timezone.now())
+            if qs.exists():
+                obj = qs.last()
+                code = obj.code
+
+            else:
+                lists = ["register", "resend", "change_phone", "password_reset", "order"]
+                if type in lists:
+                    code = "".join(str(randrange(0,10)) for _ in range(6))
+                    Cofirmation.objects.create(
+                    type=type,
+                    user_id = user.id,
+                    code=code,
+                    expiration_time=timezone.now() + timezone.timedelta(minutes=3)
+                    )
+                else:
+                    return Response({"success":False, "message":"Bunday Verifikatsiya turi mavjud emas"})
+            send_code(code)
+            response = {"success":True, "message":"Kod qayta yuborildi tasdiqlang"}
+            return Response(response)
+        
+        else:
+
+            return Response({"success":False, "message":"Bunday foydalanuvchi mavjud emas"})
+
 
 ####################   USER MODEL  ################################## 
 
 
-# 1 - Rasmni Fayl holatida yuklab serverga saqlaymiz va obyektni qaytaramiz
 class UploadImageApiView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = UploadImageSerializer

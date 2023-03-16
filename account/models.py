@@ -5,12 +5,8 @@ from .utils import send_code
 from datetime import datetime, timedelta
 from django.utils import timezone
 from .managers import CustomUserManager
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core.files.base import ContentFile
-from PIL import Image
-from rest_framework.response import Response
 
 
 
@@ -27,7 +23,6 @@ class Address(models.Model):
 
 
 class User(AbstractBaseUser,PermissionsMixin):
-
     phone = models.CharField(max_length=64, verbose_name="Telefon", unique=True)
     activated_date = models.DateTimeField(blank=True, null=True, verbose_name='Activlashgan Vaqti')
     is_seller = models.BooleanField(default=False, verbose_name="Sotuvchi holati")
@@ -40,10 +35,37 @@ class User(AbstractBaseUser,PermissionsMixin):
 
     objects = CustomUserManager()
 
+    def edit_phone(self, phone):   
+        code = "".join(str(randrange(0,10)) for _ in range(6))
+        Cofirmation.objects.create(
+        type="change_phone",
+        user_id=self.id,
+        code=code,
+        expiration_time=timezone.now() + timezone.timedelta(minutes=3)
+        )
+        self.is_active = False
+        self.phone = phone
+
+        try:
+            send_code(code)
+        except:
+            print("Kod yuborilmadi ! ")
+
     def __str__(self):
         return str(self.phone)
 
+
 class Cofirmation(models.Model):
+
+    TYPE_CHOCES = (
+        ("register","register"),
+        ("resend","resend"),
+        ("change_phone", "change_phone"),
+        ("password_reset", "password_reset"),
+        ("order", "order")
+    )
+
+    type = models.CharField(max_length=20, choices=TYPE_CHOCES, default="register")
     user = models.ForeignKey('account.User', on_delete=models.CASCADE, related_name='verify_codes')
     code = models.CharField(max_length=6)
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="Qo'shilgan vaqti")
@@ -64,7 +86,6 @@ class Cofirmation(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user')
-    # photo = models.ForeignKey('account.ProfilePictures', verbose_name="Profil rasmi", blank=True, null=True, on_delete=models.CASCADE, related_name="profile_picture")
     first_name = models.CharField(max_length=50, verbose_name="Ism", blank=True, null=True)
     last_name = models.CharField(max_length=50, verbose_name="Familiya", blank=True, null=True)
     email = models.EmailField(max_length=120, null=True, blank=True, verbose_name="Email")
@@ -140,4 +161,6 @@ def post_save_user(sender, instance, created, **kwargs):
             send_code(code)
         except:
             print("Kod yuborilmadi ! ")
+
+    
 

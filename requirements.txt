@@ -11,6 +11,7 @@ django-templated-mail==1.1.1
 djangorestframework==3.12
 djangorestframework-simplejwt==4.8.0
 django-cors-headers==3.14.0
+drf-yasg==1.21.5
 idna==3.4
 itypes==1.2.0
 Jinja2==3.1.2
