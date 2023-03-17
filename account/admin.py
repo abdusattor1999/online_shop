@@ -34,7 +34,7 @@ admin.site.register(User, CustomUserAdmin)
 
 @admin.register(Address)
 class AdresAdmin(admin.ModelAdmin):
-    list_display = ("user","title","province","district","zip_code")
+    list_display = ("title", "profile", "country" , "province","district","zip_code")
 
 @admin.register(Cofirmation)
 class ConfirmAdmin(admin.ModelAdmin):

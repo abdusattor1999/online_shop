@@ -3,7 +3,7 @@ from .utils import send_code
 # Create your views here.
 from rest_framework.exceptions import ValidationError
 from .serializers import (
-    SignupSerializer, LogoutSerializer, ChangePasswordSerializer,
+    AddressSerializer, SignupSerializer, LogoutSerializer, ChangePasswordSerializer,
     UploadImageSerializer, CreateProfileSerializer,  ProfilePicSerializer,
     ChangePhoneSerializer, DeleteUserSerilizer
     )
@@ -341,20 +341,67 @@ class CreateProfileView(APIView):
         return Response(data)
 
 
-
-
 class UpdateProfileView(UpdateAPIView):
     serializer_class = CreateProfileSerializer
     permission_classes = (IsAuthenticated,)
     queryset = Profile.objects.all()
 
-# --------------------------------------------------------------    
-
-
+    def get_object(self):
+        user = self.request.user
+        obj = Profile.objects.filter(user_id=user.id).last()
+        return obj
     
+    def put(self, request, *args, **kwargs):
+        self.update(request, *args, **kwargs)
+        return Response({"success":True, "message":"Profil malumotlari yangilandi"})
 
 
+# ------------------Address--------------------------------------------    
 
+class AddressCreateView(generics.CreateAPIView):
+    serializer_class = AddressSerializer
+    permission_classes = IsAuthenticated,
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        serializer.save(profile=Profile.objects.get(user_id=user.id))
+
+    def post(self, request, *args, **kwargs):
+        zip_code = self.request.data.get("zip_code")
+        qs = Address.objects.filter(zip_code=zip_code)
+        if qs.exists():
+            data = {
+                "success":False, "message":"Bu manzil allaqachon qo'shilgan !"
+            }
+            return Response(data)
+
+        self.create(request, *args, **kwargs)
+        return Response({"success":True, "message":"Manzil malumotlari saqlandi"})
+
+class AddressEditView(UpdateAPIView):
+    serializer_class = AddressSerializer
+    permission_classes = IsAuthenticated,
+
+    def get_queryset(self):
+        user = self.request.user
+        profile = Profile.objects.get(user_id=user.id)
+        return Address.objects.filter(profile_id=profile.id)
+    
+    def put(self, request, *args, **kwargs):
+        self.update(request, *args, **kwargs)
+        return Response({"success":True, "message":"Manzil malumotlari yangilandi"})
+
+
+class AddressDeleteView(generics.DestroyAPIView):
+    permission_classes = IsAuthenticated,
+
+    def get_queryset(self):
+        profile = Profile.objects.get(user=self.request.user)
+        return Address.objects.filter(profile_id=profile.id)
+
+    def delete(self, request, *args, **kwargs):
+        self.destroy(request, *args, **kwargs)
+        return Response({"success":True, "message":"Manzil o'chirish muvaffaqiyatli"})
 
 
 

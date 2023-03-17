@@ -1,4 +1,4 @@
-from .models import User, Profile, ProfilePictures, UploadFile
+from .models import User, Profile, ProfilePictures, UploadFile, Address
 from rest_framework import serializers, status
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from django.contrib.auth.password_validation import validate_password
@@ -101,5 +101,11 @@ class CreateProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ("first_name","last_name", "photo", "email")
+
+#------------- Address --------------------------------------------------------------
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = ['title', 'country', 'province', 'district', 'street', 'zip_code']
 
 

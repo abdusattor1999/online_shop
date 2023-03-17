@@ -11,8 +11,9 @@ from django.dispatch import receiver
 
 
 class Address(models.Model):
-    user = models.ForeignKey('account.Profile', on_delete=models.CASCADE)
+    profile = models.ForeignKey('account.Profile', on_delete=models.CASCADE)
     title = models.CharField(max_length=100, verbose_name='Manzil sarlavhasi', blank=True, null=True)
+    country = models.CharField(max_length=50, verbose_name='Mamlakat')
     province = models.CharField(max_length=50, verbose_name='Viloyat')
     district = models.CharField(max_length=50, verbose_name='Tuman / Shahar')
     street = models.CharField(max_length=150, verbose_name="Ko'cha nomi va uy raqami")
