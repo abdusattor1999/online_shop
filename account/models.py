@@ -111,7 +111,8 @@ class Profile(models.Model):
 
     def update_image(self, images: list):
         # update image for user
-        pass
+        for image_id in images:
+            ProfilePictures.objects.update(instance_id=self.id, image_id=image_id)
 
 
 

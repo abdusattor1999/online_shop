@@ -1,6 +1,5 @@
-from django.shortcuts import render
 from .utils import send_code
-# Create your views here.
+
 from rest_framework.exceptions import ValidationError
 from .serializers import (
     AddressSerializer, SignupSerializer, LogoutSerializer, ChangePasswordSerializer,
@@ -128,7 +127,8 @@ class ChangePhoneView(APIView):
         print('Validatsiya Muvaffaqiyatli !')
         return True
 
-    def put(self, request):
+
+    def patch(self, request):
         serializer = ChangePhoneSerializer(data=request.data)
         if serializer.is_valid():
             user = self.request.user
@@ -351,9 +351,10 @@ class UpdateProfileView(UpdateAPIView):
         obj = Profile.objects.filter(user_id=user.id).last()
         return obj
     
-    def put(self, request, *args, **kwargs):
-        self.update(request, *args, **kwargs)
+    def patch(self, request, *args, **kwargs):
+        self.partial_update(request, *args, **kwargs)
         return Response({"success":True, "message":"Profil malumotlari yangilandi"})
+    
 
 
 # ------------------Address--------------------------------------------    
@@ -364,7 +365,12 @@ class AddressCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         user = self.request.user
-        serializer.save(profile=Profile.objects.get(user_id=user.id))
+        profile = Profile.objects.filter(user_id=user.id)
+        if profile.exists():
+            serializer.save(profile=profile)
+        else:
+            return Response({"success":False, "message":"Manzil uchun profil mavjud emas"})
+
 
     def post(self, request, *args, **kwargs):
         zip_code = self.request.data.get("zip_code")
@@ -374,6 +380,8 @@ class AddressCreateView(generics.CreateAPIView):
                 "success":False, "message":"Bu manzil allaqachon qo'shilgan !"
             }
             return Response(data)
+
+
 
         self.create(request, *args, **kwargs)
         return Response({"success":True, "message":"Manzil malumotlari saqlandi"})
@@ -387,8 +395,9 @@ class AddressEditView(UpdateAPIView):
         profile = Profile.objects.get(user_id=user.id)
         return Address.objects.filter(profile_id=profile.id)
     
-    def put(self, request, *args, **kwargs):
-        self.update(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        self.partial_update(request, *args, **kwargs)
         return Response({"success":True, "message":"Manzil malumotlari yangilandi"})
 
 
