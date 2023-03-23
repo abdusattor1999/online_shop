@@ -2,12 +2,11 @@ from django.urls import path
 from account.views import (
     SignupView, VerifyView, LoguotView,
     UploadImageApiView, CreateProfileView , ChangePasswordView , ResendCodeView,
-    ChangePhoneView, DeleteUserView, ResetPassRequestView, ResetPassConfirm,
-    UpdateProfileView, AddressCreateView, AddressEditView, AddressDeleteView
+    ChangePhoneView, DeleteUserView, ResetPassRequestView, ResetPassConfirm, AddressCreateView,
+    AddressAPIView, ProfileAPIView
     )
 from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
+    TokenObtainPairView, TokenRefreshView,
 )
 
 
@@ -29,16 +28,12 @@ urlpatterns = [
 
 #___Profile________________________________________________________________________________________________________
     path("upload-image/", UploadImageApiView.as_view(), name="upload_image"),
-    path("profile/create/", CreateProfileView.as_view(), name="pr_create"),
-    path("profile/edit/", UpdateProfileView.as_view(), name="pr_edit"),
+    path("profile/", CreateProfileView.as_view(), name="profiles"),
+    path("profile/<int:pk>/", ProfileAPIView.as_view(), name="profile"),
 
 #___Address_______________________________________________________________________________________        
-    path("address/create/", AddressCreateView.as_view(), name="adres_create"),
-    path("address/<int:pk>/edit/", AddressEditView.as_view(), name="adres_edit"),
-    path("address/<int:pk>/delete/", AddressDeleteView.as_view(), name="adres_edit"),
-
-
-
+    path("address/", AddressCreateView.as_view(), name="adres_create"),
+    path("address/<int:pk>/", AddressAPIView.as_view(), name="adres_edit"),
 ]
 
 

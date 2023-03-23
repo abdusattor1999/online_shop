@@ -103,9 +103,10 @@ class CreateProfileSerializer(serializers.ModelSerializer):
         fields = ("first_name","last_name", "photo", "email")
 
 #------------- Address --------------------------------------------------------------
+
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = ['title', 'country', 'province', 'district', 'street', 'zip_code']
+        fields = ["id", 'title', 'country', 'province', 'district', 'street', 'zip_code']
 
 
