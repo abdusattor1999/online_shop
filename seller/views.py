@@ -11,6 +11,8 @@ class CreateSellerView(ListCreateAPIView):
     permission_classes = IsAuthenticated,
     serilizer_class = CreateSellerSerializer
     
+    def get_queryset(self):
+        return Seller.objects.all()
     
     def post(self, request):
         serializer = self.serilizer_class(data=request.data)
