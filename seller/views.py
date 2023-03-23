@@ -9,7 +9,7 @@ from account.models import UploadFile
 
 class CreateSellerView(ListCreateAPIView):
     permission_classes = IsAuthenticated,
-    serilizer_class = CreateSellerSerializer
+    serializer_class = CreateSellerSerializer
     
     def get_queryset(self):
         return Seller.objects.all()
