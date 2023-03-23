@@ -26,7 +26,7 @@ class CreateSellerSerializer(serializers.Serializer):
 class SellerEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seller
-        fields = ("first_name", "last_name", "surname", "shop_name", "email", "inn", "bank_mfo", "bank_account", "bio", "address")
+        fields = ("id","first_name", "last_name", "surname", "shop_name", "email", "inn", "bank_mfo", "bank_account", "bio", "address")
         
 
         

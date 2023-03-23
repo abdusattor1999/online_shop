@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.generics import UpdateAPIView, CreateAPIView, DestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, DestroyAPIView
 from .models import Seller, ShopPictures
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -7,11 +7,10 @@ from .serializer import CreateSellerSerializer, SellerEditSerializer
 from account.models import UploadFile
 
 
-class CreateSellerView(APIView):
+class CreateSellerView(ListCreateAPIView):
     permission_classes = IsAuthenticated,
     serilizer_class = CreateSellerSerializer
     
-
     
     def post(self, request):
         serializer = self.serilizer_class(data=request.data)
@@ -84,7 +83,7 @@ class CreateSellerView(APIView):
 
 
 
-class SellerEditView(UpdateAPIView):
+class SellerEditView(RetrieveUpdateDestroyAPIView):
     serializer_class = SellerEditSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -96,20 +95,10 @@ class SellerEditView(UpdateAPIView):
         self.partial_update(request, *args, **kwargs)
         return Response({"success":True, "message":"Profil malumotlari yangilandi"})
 
-
-
-
-class SellerDeleteView(DestroyAPIView):
-    permission_classes = IsAuthenticated,
-
-    def get_queryset(self):
-        user = self.request.user
-        return Seller.objects.filter(user_id=user.id)
-    
-    def delete(self, request, *args, **kwargs):
-        
+    def delete(self, request, *args, **kwargs):     
         self.destroy(request, *args, **kwargs)
         return Response({"success":True, "message":"Do'kon o'chirish muvaffaqiyatli"})
+
 
 
 
