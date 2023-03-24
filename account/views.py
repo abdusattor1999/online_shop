@@ -97,6 +97,29 @@ class VerifyView(APIView):
                 response = {"success": False, "message": "Telefon raqami xato"}
                 return Response(response, status=status.HTTP_404_NOT_FOUND)
 
+#--------------------------------------------------------------
+from rest_framework_simplejwt.views import TokenViewBase
+from rest_framework_simplejwt.serializers import TokenObtainSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+
+class LoginView(TokenViewBase):
+    serializer_class = TokenObtainSerializer
+    
+    def get_token(cls, user):
+        return RefreshToken.for_user(user)
+    
+    def post(self,request):
+        user = User.objects.filter(phone=request.data['phone']).last()
+        refresh = self.get_token(user)
+
+        data = {
+            'refresh': str(refresh),
+            'access' : str(refresh.access_token),
+            'id':str(user.id)
+        }
+
+        return Response(data)
+
 
 class LoguotView(generics.GenericAPIView):
     serializer_class = LogoutSerializer

@@ -3,15 +3,13 @@ from account.views import (
     SignupView, VerifyView, LoguotView,
     UploadImageApiView, CreateProfileView , ChangePasswordView , ResendCodeView,
     ChangePhoneView, UserAPIView, ResetPassRequestView, ResetPassConfirm, AddressCreateView,
-    AddressAPIView, ProfileAPIView
+    AddressAPIView, ProfileAPIView,LoginView
     )
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView, TokenRefreshView,
-)
+from rest_framework_simplejwt.views import TokenRefreshView
 
 
 urlpatterns = [
-    path('login/', TokenObtainPairView.as_view(), name='login'),
+    path('login/', LoginView.as_view(), name='login'),
     path("token/refresh/", TokenRefreshView.as_view(), name='token_refresh'),
     path('signup/', SignupView.as_view(), name='signup'),
     path('verify/', VerifyView.as_view(), name='verify'),
