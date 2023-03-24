@@ -79,6 +79,7 @@ class LogoutSerializer(serializers.Serializer):
 class DeleteUserSerilizer(serializers.ModelSerializer): 
     class Meta:
         model = User
+        fields = ("__all__")
 
 
 ###---------------- User Model  -------------------------------------

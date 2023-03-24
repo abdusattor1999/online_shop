@@ -2,7 +2,7 @@ from django.urls import path
 from account.views import (
     SignupView, VerifyView, LoguotView,
     UploadImageApiView, CreateProfileView , ChangePasswordView , ResendCodeView,
-    ChangePhoneView, DeleteUserView, ResetPassRequestView, ResetPassConfirm, AddressCreateView,
+    ChangePhoneView, UserAPIView, ResetPassRequestView, ResetPassConfirm, AddressCreateView,
     AddressAPIView, ProfileAPIView
     )
 from rest_framework_simplejwt.views import (
@@ -20,7 +20,7 @@ urlpatterns = [
     path('change-phone/', ChangePhoneView.as_view(), name='change_phone'),
     path('change_password/', ChangePasswordView.as_view(), name='change_password'),
 
-    path('user/delete/<int:pk>/', DeleteUserView.as_view(), name='user-delete'),
+    path('user/<int:pk>/', UserAPIView.as_view(), name='user-delete'),
     path("reset-password/", ResetPassRequestView.as_view(), name="request-reset-pass"),
     path("reset-verify/", VerifyView.as_view(), name="verify-reset-pass"),
     path("send-resetted/", ResetPassConfirm.as_view(), name="reset-pass-done"),

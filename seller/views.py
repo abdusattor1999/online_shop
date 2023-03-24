@@ -3,19 +3,22 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from .models import Seller, ShopPictures
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from .serializer import CreateSellerSerializer, SellerEditSerializer
+from .serializer import SellerEditSerializer
 from account.models import UploadFile
 
 
-class CreateSellerView(ListCreateAPIView):
-    permission_classes = IsAuthenticated,
-    serializer_class = CreateSellerSerializer
-    
+
+class SellerEditView(RetrieveUpdateDestroyAPIView):
+    serializer_class = SellerEditSerializer
+    permission_classes = (IsAuthenticated,)
+
     def get_queryset(self):
-        return Seller.objects.all()
+        user = self.request.user
+        return Seller.objects.filter(user_id=user.id)
     
+
     def post(self, request):
-        serializer = self.serilizer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         # -------- Fields ----------------------------------------
@@ -61,7 +64,8 @@ class CreateSellerView(ListCreateAPIView):
                 bio=bio,
                 address=address
             )
-
+            self.request.user.is_seller = True
+            self.request.user.save()
 
         if image is not None:
             validate_picture(picture=image)
@@ -78,21 +82,13 @@ class CreateSellerView(ListCreateAPIView):
 
         data = {
             "success":True,
-            "message":"Sotuvchi profili muvaffaqiyatli ochildi"
+            "message":"Sotuvchi profili muvaffaqiyatli ochildi",
+            "id":seller.id
             }
         return Response(data)
 
 
 
-
-class SellerEditView(RetrieveUpdateDestroyAPIView):
-    serializer_class = SellerEditSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def get_queryset(self):
-        user = self.request.user
-        return Seller.objects.filter(user_id=user.id)
-    
     def patch(self, request, *args, **kwargs):
         self.partial_update(request, *args, **kwargs)
         return Response({"success":True, "message":"Profil malumotlari yangilandi"})

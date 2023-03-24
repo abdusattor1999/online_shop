@@ -164,10 +164,28 @@ class ChangePasswordView(generics.UpdateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DeleteUserView(generics.DestroyAPIView):
+class UserAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = DeleteUserSerilizer
     permission_classes = IsAuthenticated,
+
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+            
+        data = {
+            "id" : user.id,
+            "phone" : user.phone ,
+            "is_seller" : user.is_seller ,
+            "is_active" : user.is_active
+        }
+        
+        profile = Profile.objects.filter(user=user)
+        if profile.exists():
+            data['profile'] = profile.id
+
+        if user.is_seller==True:
+            data['seller'] = user.seller.id
+        return Response(data)
 
     def delete(self, request, *args, **kwargs):
         self.destroy(request, *args, **kwargs)
@@ -340,6 +358,7 @@ class CreateProfileView(generics.ListCreateAPIView):
         data = {
             'success': True,
             'message': "Profil malumotlari saqlandi",
+            'id':profile.id
         }
         return Response(data)
 
