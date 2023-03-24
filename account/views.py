@@ -1,5 +1,4 @@
 from .utils import send_code
-
 from rest_framework.exceptions import ValidationError
 from .serializers import (
     AddressSerializer, SignupSerializer, LogoutSerializer, ChangePasswordSerializer,

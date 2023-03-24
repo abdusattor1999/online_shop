@@ -48,7 +48,7 @@ class ChangePhoneSerializer(serializers.Serializer):
 class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('phone', 'password')
+        fields = ("id", 'phone', 'password')
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
@@ -92,7 +92,7 @@ class UploadImageSerializer(serializers.ModelSerializer):
 class ProfilePicSerializer(serializers.ModelSerializer):
     class Meta:    
         model = ProfilePictures
-        fields = ('image',)
+        fields = ('id', 'image',)
 
 
 
@@ -100,7 +100,7 @@ class CreateProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ("first_name","last_name", "photo", "email")
+        fields = ("id","first_name","last_name", "photo", "email")
 
 #------------- Address --------------------------------------------------------------
 
