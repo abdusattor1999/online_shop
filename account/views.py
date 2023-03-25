@@ -176,7 +176,8 @@ class UserAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = IsAuthenticated,
 
     def get(self, request, *args, **kwargs):
-        user = self.request.user
+        user = User.objects.filter(id=kwargs["pk"]).last()
+        # user = self.request.user
             
         data = {
             "id" : user.id,
