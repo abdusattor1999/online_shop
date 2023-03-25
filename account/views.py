@@ -204,7 +204,8 @@ class UserAPIView(generics.RetrieveUpdateDestroyAPIView):
         
         profile = Profile.objects.filter(user=user)
         if profile.exists():
-            data['profile'] = profile.id
+            pr = profile.last()
+            data['profile'] = pr.id
 
         if user.is_seller==True:
             data['seller'] = user.seller.id
