@@ -5,7 +5,7 @@ from account.views import (
     ChangePhoneView, UserAPIView, ResetPassRequestView, ResetPassConfirm, AddressCreateView,
     AddressAPIView, ProfileAPIView,LoginView
     )
-from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
 
 urlpatterns = [

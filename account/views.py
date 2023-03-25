@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 from .serializers import (
     AddressSerializer, SignupSerializer, LogoutSerializer, ChangePasswordSerializer,
     UploadImageSerializer, CreateProfileSerializer,  ProfilePicSerializer,
-    ChangePhoneSerializer, DeleteUserSerilizer
+    ChangePhoneSerializer, DeleteUserSerilizer, LoginSerializer
     )
 from random import randrange
 from datetime import datetime, timedelta
@@ -99,26 +99,9 @@ class VerifyView(APIView):
 
 #--------------------------------------------------------------
 from rest_framework_simplejwt.views import TokenViewBase
-from rest_framework_simplejwt.serializers import TokenObtainSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
 
 class LoginView(TokenViewBase):
-    serializer_class = TokenObtainSerializer
-    
-    def get_token(cls, user):
-        return RefreshToken.for_user(user)
-    
-    def post(self,request):
-        user = User.objects.filter(phone=request.data['phone']).last()
-        refresh = self.get_token(user)
-
-        data = {
-            'refresh': str(refresh),
-            'access' : str(refresh.access_token),
-            'id':str(user.id)
-        }
-
-        return Response(data)
+    serializer_class = LoginSerializer
 
 
 class LoguotView(generics.GenericAPIView):
@@ -476,6 +459,18 @@ class AddressAPIView(generics.RetrieveUpdateDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         self.destroy(request, *args, **kwargs)
         return Response({"success":True, "message":"Manzil o'chirish muvaffaqiyatli"})
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
