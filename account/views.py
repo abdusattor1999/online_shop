@@ -392,6 +392,28 @@ class ProfileAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CreateProfileSerializer
     queryset = Profile.objects.all()
     
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+        profile = Profile.objects.filter(user_id = user.id)
+        if profile.exists():
+            pr = profile.last()
+            data = {
+                "id":pr.id,
+                "first_name" : profile.first_name,
+                "last_name" : profile.last_name,
+                "email" : profile.email
+                }
+            
+            addr = Address.objects.filter(profile=pr)
+            if addr.exists():
+                addres = addr.last()
+                data['address'] = addres.id
+
+        else:
+            data = {
+                "success":False, "message":"Bu foydalanuvchi profili emas yoki bunday profil mavjud emas."
+            }
+        return Response(data)
 
     def patch(self, request, *args, **kwargs):
         self.partial_update(request, *args, **kwargs)
