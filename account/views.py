@@ -377,15 +377,15 @@ class ProfileAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Profile.objects.all()
     
     def get(self, request, *args, **kwargs):
-        user = self.request.user
-        profile = Profile.objects.filter(user_id = user.id)
+        profile = Profile.objects.filter(id=kwargs['pk'])
+        pr = profile.last()
         if profile.exists():
-            pr = profile.last()
             data = {
                 "id":pr.id,
-                "first_name" : profile.first_name,
-                "last_name" : profile.last_name,
-                "email" : profile.email
+                "first_name" : pr.first_name,
+                "last_name" : pr.last_name,
+                "email" : pr.email,
+                "userId":pr.user_id
                 }
             
             addr = Address.objects.filter(profile=pr)
@@ -395,7 +395,7 @@ class ProfileAPIView(generics.RetrieveUpdateDestroyAPIView):
 
         else:
             data = {
-                "success":False, "message":"Bu foydalanuvchi profili emas yoki bunday profil mavjud emas."
+                "success":False, "message":"Bunday profil mavjud emas."
             }
         return Response(data)
 
