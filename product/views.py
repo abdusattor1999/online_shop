@@ -14,7 +14,6 @@ class UploadImagesAPI(CreateAPIView):
         try:
             images = request.FILES
             img_id_list = []
-            print(images)
             if images:
                 for img in images:
                     file = UploadImageProduct.objects.create(image=img)
