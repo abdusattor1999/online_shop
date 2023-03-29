@@ -23,10 +23,11 @@ CORS_ALLOWED_ORIGINS = [
 
 ALLOWED_HOSTS = [
     "abdusattor0707.pythonanywhere.com",
-    "https://olma.vercel.app"
     "http://127.0.0.1:3000",
-    "http://127.0.0.1:8000",
+    "127.0.0.1:8000",
     "127.0.0.1",
+    "localhost",
+    "https://olma.vercel.app"
 ]
 
 

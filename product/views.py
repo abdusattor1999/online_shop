@@ -11,8 +11,9 @@ class UploadImagesAPI(CreateAPIView):
     serializer_class = UploadImageSerializer
 
     def post(self, request, *args, **kwargs):
+        print("Ishla yaxshimi ?")
         try:
-            images = request.FILES
+            images = request.FILES.values()
             img_id_list = []
             if images:
                 for img in images:
@@ -20,17 +21,14 @@ class UploadImagesAPI(CreateAPIView):
                     img_id_list.append(file.id)
                 return Response({"success": True, "message": "Rasmlar yuklandi", "results": img_id_list})
             else:
-                return Response({"success":False, "message":"So'rov tarkibida rasm yo'q"})
+                return Response({"success": False, "message": "So'rov tarkibida rasm yo'q"})
         except Exception as e:
             return Response({"success": False, "message": str(e.args)})
 
 
-
-
 class ProductCrateAPI(ListCreateAPIView):
-    permission_classes = IsAuthenticated, 
+    permission_classes = IsAuthenticated,
     serializer_class = ProductSerializer
-
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -39,7 +37,7 @@ class ProductCrateAPI(ListCreateAPIView):
         # Rasmlarni , Attributlarni  ajratvolamiz
         images = request.data.pop("images", None)
         attributes = request.data.pop("attributes", None)
-        
+
         # Productni saqlaymiz
         product = Product.objects.create(request, *args, **kwargs)
 
@@ -49,19 +47,19 @@ class ProductCrateAPI(ListCreateAPIView):
                 img = UploadImageProduct.objects.filter(id=image)
                 if img.exists():
                     ProductImage.objects.create(
-                        inctance_id = product.id,
-                        image_id = image
+                        inctance_id=product.id,
+                        image_id=image
                     )
                 else:
-                    return Response({"success":False, "message":"Bunday rasm mavjud emas"})
+                    return Response({"success": False, "message": "Bunday rasm mavjud emas"})
         else:
-            return Response({"success":False, "message":"Rasm yuklashda xatolik bor"})
+            return Response({"success": False, "message": "Rasm yuklashda xatolik bor"})
 
         # Attribut set qilamiz
         # 1 - attributes listini ichidagi har bitta dict(attrs1) birxil maxsulot bo'ladi
         # 2 - har bitta attrs bitta ProductAttribute obyekti bo'ladi
         # 3 - attrs ni ichidagi har bitta dict bitta Attribute obyekti bo'ladi -> get_or_create
-        # 4 - attrs ni ichida quantity degan qiymat bo'ladi u ProductAttributega quantity sifatida beriladi 
+        # 4 - attrs ni ichida quantity degan qiymat bo'ladi u ProductAttributega quantity sifatida beriladi
 
 # "attributes":[
 #     {
@@ -86,13 +84,11 @@ class ProductCrateAPI(ListCreateAPIView):
                 quantity = attrs.pop("quantity", None)
                 product_attr = ProductAttribute.objects.create(product=product)
                 for name, value in attrs:
-                    attr = Attribute.objects.get_or_create(name=name, value=value)
+                    attr = Attribute.objects.get_or_create(
+                        name=name, value=value)
                     product_attr.attribute.add(attr)
                 if quantity is not None:
                     product_attr.quantity = quantity
                     product_attr.save()
 
-        return Response({"success":True, "message":"Maxsulot saqlandi"})
-                      
-
-        
+        return Response({"success": True, "message": "Maxsulot saqlandi"})
