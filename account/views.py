@@ -17,6 +17,19 @@ from rest_framework import status, generics
 import re
 from .models import UploadFile, ProfilePictures
 
+######################   UTIL   ############################################
+
+
+def set_image_profile(profile, images:list, is_images=None):
+    file = UploadFile.objects.filter(id=images[0])
+    if file.exists():
+        profile.set_image(images)
+    else:
+        return Response(
+            {"success": False, "message": "Bunday rasm yuklanmagan"}
+        )
+    if is_images:
+        profile.set_image(images=images)
 
 ####################   USER MODEL  ##################################
 
@@ -353,15 +366,7 @@ class CreateProfileView(generics.ListCreateAPIView):
             is_images = True
 
         if images is not None:
-            file = UploadFile.objects.filter(id=images[0])
-            if file.last() is not None:
-                profile.set_image(images)
-            else:
-                return Response(
-                    {"success": False, "message": "Bunday rasm yuklanmagan"}
-                )
-            if is_images:
-                profile.set_image(images=images)
+            set_image_profile(profile , images, is_images=is_images)
 
         data = {
             'success': True,
@@ -385,6 +390,7 @@ class ProfileAPIView(generics.RetrieveUpdateDestroyAPIView):
                 "first_name" : pr.first_name,
                 "last_name" : pr.last_name,
                 "email" : pr.email,
+                "image" : pr.photo,
                 "userId":pr.user_id
                 }
             
@@ -400,6 +406,11 @@ class ProfileAPIView(generics.RetrieveUpdateDestroyAPIView):
         return Response(data)
 
     def patch(self, request, *args, **kwargs):
+        images = request.data.get("images", None)
+        if images is not None:
+            profile = Profile.objects.filter(id=kwargs['pk'])
+            if profile.exists():
+                set_image_profile(profile.last(), images)
         self.partial_update(request, *args, **kwargs)
         return Response({"success":True, "message":"Profil malumotlari yangilandi"})
 
