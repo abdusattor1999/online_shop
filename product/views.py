@@ -3,8 +3,8 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializer import ProductSerializer, UploadImageSerializer
-from .models import ProductImage, ProductAttribute, Attribute, Product, UploadImageProduct
-
+from .models import ProductImage, ProductAttribute, Attribute, Product, UploadImageProduct, Category
+from seller.models import Seller
 
 class UploadImagesAPI(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -37,9 +37,25 @@ class ProductCrateAPI(ListCreateAPIView):
         # Rasmlarni , Attributlarni  ajratvolamiz
         images = request.data.pop("images", None)
         attributes = request.data.pop("attributes", None)
+        category = request.data.pop("category", None)
+        get_categ = Category.objects.get_or_create(name=category.lower())[0]
 
+        seller_id = request.data.get("seller_id")
+        seller = Seller.objects.filter(id=seller_id)
+        if seller.exists():
+            sell = seller.last()
+        else:
+            return Response({"success":False, "message":"Bunday sotuvchi mavjud emas"})
         # Productni saqlaymiz
-        product = Product.objects.create(request, *args, **kwargs)
+
+        product = Product.objects.create(
+            name=request.data.get("name"),
+            category_id=get_categ.id,
+            seller_id=sell.id,
+            description=request.data.get("description", None),
+            price=request.data.get("price"),
+            discount = request.data.get("discount", None)
+        )
 
         # Rasmlarni set qilamiz
         if images is not None:
@@ -61,34 +77,18 @@ class ProductCrateAPI(ListCreateAPIView):
         # 3 - attrs ni ichidagi har bitta dict bitta Attribute obyekti bo'ladi -> get_or_create
         # 4 - attrs ni ichida quantity degan qiymat bo'ladi u ProductAttributega quantity sifatida beriladi
 
-# "attributes":[
-#     {
-#         "colour":"white",
-#         "size":"XS",
-#         "quantity":25
-#     },
-#     {
-#         "colour":"green",
-#         "size":"XL",
-#         "quantity":20
-#     },
-#     {
-#         "colour":"white",
-#         "size":"XXL",
-#         "quantity":25
-#     }
-# ]
-
         if attributes is not None:
             for attrs in attributes:
                 quantity = attrs.pop("quantity", None)
                 product_attr = ProductAttribute.objects.create(product=product)
-                for name, value in attrs:
-                    attr = Attribute.objects.get_or_create(
-                        name=name, value=value)
-                    product_attr.attribute.add(attr)
-                if quantity is not None:
-                    product_attr.quantity = quantity
-                    product_attr.save()
+                
+                for name, value in attrs.items():
+                    attr = Attribute.objects.filter(name=name, value=value)
+                    if attr.exists():
+                        attr_one = attr.last()
+                    else:
+                        attr_one = Attribute.objects.create(name=name, value=value)
+                product_attr.attribute.add(attr_one)
+
 
         return Response({"success": True, "message": "Maxsulot saqlandi"})

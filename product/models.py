@@ -6,6 +6,8 @@ class Category(models.Model):
     category = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True, related_name="categ")
     icon = models.URLField(blank=True, null=True, verbose_name="Icon URL")
 
+    def __str__(self):
+        return self.name
 
 class Product(models.Model):
     STATUS_CHOICES = {
@@ -51,7 +53,7 @@ class ProductImage(models.Model):
     image = models.ForeignKey(UploadImageProduct, on_delete=models.SET_NULL, null=True)
 
     def __str__(self) -> str:
-        return f"Product:{self.product.id}, Image:{self.id}"
+        return f"Product : {self.inctance.id},   Image : {self.image.id}"
 
 
 class Attribute(models.Model):
@@ -64,7 +66,7 @@ class Attribute(models.Model):
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='active')
 
     def __str__(self):
-        return str(self.name)
+        return f"{self.name} ({self.value})"
     
 
 class ProductAttribute(models.Model):
@@ -72,11 +74,13 @@ class ProductAttribute(models.Model):
         ("active", "active"),
         ("inactive", "inactive")
         }
-    product = models.ManyToManyField(Product, related_name="product_attributes")
+    product = models.ForeignKey(Product, related_name="product_attributes", on_delete=models.CASCADE)
     attribute = models.ManyToManyField(Attribute, blank=True)
     quantity = models.PositiveIntegerField(verbose_name="Miqdori", blank=True, null=True)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='active')
 
+    def __str__(self):
+        return f"{self.product.name}"
 
 
 

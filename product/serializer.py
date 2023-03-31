@@ -10,7 +10,7 @@ class UploadImageSerializer(serializers.Serializer):
 
 class ProductSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=100, required=True)
-    category_id = serializers.CharField(required=True)
+    category = serializers.CharField(required=True)
     seller_id = serializers.CharField(required=True)
     description = serializers.CharField(required=False)
     price = serializers.DecimalField(max_digits=12, decimal_places=2, required=True)
