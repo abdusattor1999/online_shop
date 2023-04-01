@@ -1,14 +1,15 @@
 from rest_framework.response import Response
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
+from rest_framework.generics import ListCreateAPIView,ListAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from .serializer import ProductSerializer, UploadImageSerializer
+from .serializer import ProductSerializer, UploadImageProductSerializer
 from .models import ProductImage, ProductAttribute, Attribute, Product, UploadImageProduct, Category
 from seller.models import Seller
+from rest_framework.mixins import ListModelMixin
 
 class UploadImagesAPI(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = UploadImageSerializer
+    serializer_class = UploadImageProductSerializer
 
     def post(self, request, *args, **kwargs):
         print("Ishla yaxshimi ?")
@@ -26,9 +27,43 @@ class UploadImagesAPI(CreateAPIView):
             return Response({"success": False, "message": str(e.args)})
 
 
-class ProductCrateAPI(ListCreateAPIView):
+class ProductCrateAPI(ListCreateAPIView, ListAPIView):
     permission_classes = IsAuthenticated,
     serializer_class = ProductSerializer
+    # queryset = Product.objects.all()
+    
+    # def get(self, request, *args, **kwargs):
+    #     return self.list(request, *args, **kwargs)
+    
+    def get_queryset(self): 
+        products = []
+        for pr in Product.objects.all():
+            one = {
+                "name":pr.name,
+                "category":{"id":pr.category.id, "name":pr.category.name},
+                "seller":pr.seller.shop_name,
+                "description":pr.description,
+                "price":str(pr.price),
+                "discount":pr.discount,
+                "status":pr.status,
+                "created":str(pr.created),
+                # "images":pr.images.all(),   # Bu xato beryapti  ->  Object of type ProductImage is not JSON serializable
+            }
+       
+            # pr_atts =  ProductAttribute.objects.filter(product=pr)
+            # if pr_atts.exists():
+            #     list_attrs = []
+            #     for one_attr in pr_atts:
+            #         list_attrs.append({one_attr.attribute.name:one_attr.attribute.name})
+            #     one['attributes'] = list_attrs
+            
+            # ! Bu ham qiymatni topolmayapti
+
+            products.append(one)
+        return products
+
+    def get(self, request, *args, **kwargs):
+        return Response(self.get_queryset())
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)

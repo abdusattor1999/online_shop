@@ -30,13 +30,11 @@ class Product(models.Model):
             price = self.price
         return price
 
-
     def __str__(self):
         return str(self.name)
 
 class UploadImageProduct(models.Model):
-    image = models.FileField(upload_to="product_images/")
-    
+    image = models.FileField(upload_to="product_images/") 
     @property
     def url(self):
         if self.image:
@@ -44,7 +42,6 @@ class UploadImageProduct(models.Model):
         else:
             return None
              
-
     def __str__(self):
         return str(self.id)
 
@@ -67,7 +64,6 @@ class Attribute(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.value})"
-    
 
 class ProductAttribute(models.Model):
     STATUS_CHOICES = {

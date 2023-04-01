@@ -3,7 +3,7 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 
 
-class UploadImageSerializer(serializers.Serializer):
+class UploadImageProductSerializer(serializers.Serializer):
     class Meta:
         model = UploadImageProduct
         fields = ("image")

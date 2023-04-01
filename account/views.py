@@ -430,7 +430,6 @@ class AddressCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         return Address.objects.all()
 
-
     def perform_create(self, serializer):
         user = self.request.user
         profile = Profile.objects.filter(user_id=user.id)
