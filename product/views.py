@@ -30,69 +30,6 @@ class ProductCrateAPI(ListCreateAPIView, ListAPIView):
     permission_classes = IsAuthenticated,
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
-    
-    # def get(self, request, *args, **kwargs):
-    #     return self.list(request, *args, **kwargs)
-    
-    def get_queryset(self, object=None, category=None): 
-        products = []
-        images = []
-        if category:
-            all_queryset = Product.objects.filter(category_id=category)
-        elif object:
-            all_queryset = Product.objects.filter(id=object)
-        else:
-            all_queryset = Product.objects.all()
-        
-        for pr in all_queryset:
-            one = {
-                "id":pr.id,
-                "name":pr.name,
-                "category":{"id":pr.category.id, "name":pr.category.name},
-                "seller":{"id":pr.seller.id, "name":pr.seller.shop_name},
-                "description":pr.description,
-                "price":str(pr.price),
-                "discount":pr.discount,
-                "status":pr.status,
-                "created":str(pr.created)
-            }
-
-            # Rasmlarni listga dict holatida solib chiqamiz
-            img_qs = ProductImage.objects.filter(inctance=pr)
-            for img in img_qs:
-                images.append({"id":img.id, "url":img.image.url})
-            one["images"] = images 
-
-            # Attribute qo'shamiz  
-            pr_atts =  ProductAttribute.objects.filter(product=pr)
-            if pr_atts.exists():
-                list_attrs = []
-                for one_attr in pr_atts:
-                    attr_obs = Attribute.objects.filter(many_attributes=one_attr)
-                    listga_qosh = {}
-                    # Bir ProductAttribut obyektiga tegishli hamma Attributlarni olamiz
-                    for i in attr_obs:
-                        listga_qosh[i.name] = i.value
-
-                    if one_attr.quantity is not None:
-                        listga_qosh['quantity'] = one_attr.quantity
-                    list_attrs.append(listga_qosh)
-                one['attributes'] = list_attrs
-
-            products.append(one)
-        return products
-
-    def get(self, request, *args, **kwargs):
-        one_obj = kwargs.get("pk", False)
-        categ = kwargs.get("category", False)
-        if categ:
-            resp = Response(self.get_queryset(category=categ))
-        elif one_obj:
-            resp = Response(self.get_queryset(object=one_obj))
-        else:
-            resp = Response(self.get_queryset())
-        return resp
-
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -123,38 +60,102 @@ class ProductCrateAPI(ListCreateAPIView, ListAPIView):
 
         # Rasmlarni set qilamiz
         if images is not None:
-            for image in images:
-                img = UploadImageProduct.objects.filter(id=image)
-                if img.exists():
-                    ProductImage.objects.create(
-                        inctance_id=product.id,
-                        image_id=image
-                    )
-                else:
-                    return Response({"success": False, "message": "Bunday rasm mavjud emas"})
+            product.set_images(images)
         else:
             return Response({"success": False, "message": "Rasm yuklashda xatolik bor"})
 
-        # Attribut set qilamiz
-        # 1 - attributes listini ichidagi har bitta dict(attrs1) birxil maxsulot bo'ladi
-        # 2 - har bitta attrs bitta ProductAttribute obyekti bo'ladi
-        # 3 - attrs ni ichidagi har bitta dict bitta Attribute obyekti bo'ladi -> get_or_create
-        # 4 - attrs ni ichida quantity degan qiymat bo'ladi u ProductAttributega quantity sifatida beriladi
-
+        # Attributlarni qo'shamiz
         if attributes is not None:
-            for attrs in attributes:
-                quantity = attrs.pop("quantity", None)
-                product_attr = ProductAttribute.objects.create(product=product)
-                
-                for name, value in attrs.items():
-                    attr = Attribute.objects.filter(name=name, value=value)
-                    if attr.exists():
-                        attr_one = attr.last()
-                    else:
-                        attr_one = Attribute.objects.create(name=name, value=value)
-                    product_attr.attribute.add(attr_one)
-                product_attr.quantity = quantity
-                product_attr.save()
-
+            product.set_attributes(attributes)
 
         return Response({"success": True, "message": "Maxsulot saqlandi", "id":product.id})
+
+
+
+class ProductEditDeleteAPI(RetrieveUpdateDestroyAPIView):
+    permission_classes = IsAuthenticated,
+    serializer_class = ProductSerializer
+
+    def get_queryset(self, object=None, category=None): 
+        products = []
+        images = []
+        if category:
+            all_queryset = Product.objects.filter(category_id=category, status='active')
+        elif object:
+            all_queryset = Product.objects.filter(id=object, status='active')
+        else:
+            all_queryset = Product.objects.filter(status='active')
+        
+        if all_queryset.exists:
+
+            for pr in all_queryset:
+                one = {
+                    "id":pr.id,
+                    "name":pr.name,
+                    "category":{"id":pr.category.id, "name":pr.category.name},
+                    "seller":{"id":pr.seller.id, "name":pr.seller.shop_name},
+                    "description":pr.description,
+                    "old_price":str(pr.price),
+                    "price":str(pr.get_price()),
+                    "discount":pr.discount,
+                    "status":pr.status,
+                    "created":str(pr.created)
+                }
+
+                # Rasmlarni listga dict holatida solib chiqamiz
+                img_qs = ProductImage.objects.filter(inctance=pr)
+                for img in img_qs:
+                    images.append({"id":img.id, "url":img.image.url})
+                one["images"] = images 
+
+                # Attribute qo'shamiz  
+                pr_atts =  ProductAttribute.objects.filter(product=pr, status='active')
+                if pr_atts.exists():
+                    list_attrs = []
+                    for one_attr in pr_atts:
+                        attr_obs = Attribute.objects.filter(many_attributes=one_attr)
+                        listga_qosh = {}
+                        # Bir ProductAttribut obyektiga tegishli hamma Attributlarni olamiz
+                        for i in attr_obs:
+                            listga_qosh[i.name] = i.value
+
+                        if one_attr.quantity is not None:
+                            listga_qosh['quantity'] = one_attr.quantity
+                        list_attrs.append(listga_qosh)
+                    one['attributes'] = list_attrs
+
+                products.append(one)
+            return products
+        else:
+            return Response({"success":False, "message":"Munday maxsulot mavjud emas"})
+
+    def get(self, request, *args, **kwargs):
+        one_obj = kwargs.get("pk", False)
+        categ = kwargs.get("category", False)
+        if categ:
+            resp = Response(self.get_queryset(category=categ))
+        elif one_obj:
+            resp = Response(self.get_queryset(object=one_obj))
+        else:
+            resp = Response(self.get_queryset())
+        return resp
+
+
+
+
+    def patch(self, request, *args, **kwargs):
+        product = Product.objects.get(id=kwargs['pk'])          
+        attributes = self.request.data.pop("attributes", None)
+        delete_old = self.request.data.pop("delete_old_attrs", None)
+
+        if attributes is not None:
+            product.set_attributes(attributes, delete_old)
+
+        images = self.request.data.pop("images", None)
+        old_images = self.request.data.pop("delete_old_images", None)
+        if images is not None:
+            product.set_images(images, old_images)
+
+        self.partial_update(request, *args, **kwargs)
+        
+        return Response({"success":True, "message":"Mahsulot malumotlari yangilandi"})

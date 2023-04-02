@@ -74,7 +74,7 @@ class SellerEditView(RetrieveUpdateDestroyAPIView):
             seller.set_image(image)
 
         else:   
-            return Response({"success":False,"message":"Bunday rasm yuklanmagan"})
+            return Response({"success":False,"message":"Rasm yuklanmadi"})
         
         if is_images:
                 print("is_image = True from views 90")
