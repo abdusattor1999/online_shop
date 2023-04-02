@@ -6,6 +6,10 @@ from .models import Product, ProductAttribute, Category ,ProductImage, UploadIma
 class ProductAdmin(admin.ModelAdmin):
     list_display = ("name", "category", "seller","price", "status", "created")
 
+@admin.register(UploadImageProduct)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ("id", "url")
+
 @admin.register(ProductAttribute)
 class ProductAttributeAdmin(admin.ModelAdmin):
     fields = ['product', "attribute"]

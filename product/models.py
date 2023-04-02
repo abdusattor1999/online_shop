@@ -1,6 +1,11 @@
 from django.db import models
 
 
+STATUS_CHOICES = {
+        ("active", "active"),
+        ("inactive", "inactive")
+        }
+
 class Category(models.Model):
     name = models.CharField(max_length=50, verbose_name="Nomi")
     category = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True, related_name="categ")
@@ -9,11 +14,9 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+
+
 class Product(models.Model):
-    STATUS_CHOICES = {
-        ("active", "active"),
-        ("inactive", "inactive")
-    }
     name = models.CharField(max_length=100, verbose_name="Maxsulot nomi")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="product_category")
     seller = models.ForeignKey('seller.Seller', on_delete=models.CASCADE)
@@ -54,10 +57,6 @@ class ProductImage(models.Model):
 
 
 class Attribute(models.Model):
-    STATUS_CHOICES = {
-        ("active", "active"),
-        ("inactive", "inactive")
-        }
     name = models.CharField(max_length=50)
     value = models.CharField(max_length=50)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='active')
@@ -66,12 +65,8 @@ class Attribute(models.Model):
         return f"{self.name} ({self.value})"
 
 class ProductAttribute(models.Model):
-    STATUS_CHOICES = {
-        ("active", "active"),
-        ("inactive", "inactive")
-        }
     product = models.ForeignKey(Product, related_name="product_attributes", on_delete=models.CASCADE)
-    attribute = models.ManyToManyField(Attribute, blank=True)
+    attribute = models.ManyToManyField(Attribute, blank=True, related_name="many_attributes")
     quantity = models.PositiveIntegerField(verbose_name="Miqdori", blank=True, null=True)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='active')
 
