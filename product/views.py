@@ -5,7 +5,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializer import ProductSerializer, UploadImageProductSerializer
 from .models import ProductImage, ProductAttribute, Attribute, Product, UploadImageProduct, Category
 from seller.models import Seller
-from rest_framework.mixins import ListModelMixin
 
 class UploadImagesAPI(CreateAPIView):
     permission_classes = (IsAuthenticated,)
