@@ -1,4 +1,4 @@
-from .models import Product, UploadImageProduct
+from .models import Product, UploadImageProduct, Category
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
@@ -7,6 +7,15 @@ class UploadImageProductSerializer(serializers.Serializer):
     class Meta:
         model = UploadImageProduct
         fields = ("image")
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ("__all__")
+
+    def create(self, validated_data):
+        return super().create(validated_data)
+
 
 class ProductSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=100, required=True)

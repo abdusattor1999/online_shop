@@ -58,7 +58,6 @@ class Product(models.Model):
                 for i in old_attributes:
                     # ProductAttribute.objects.delete(id=i.id)
                     i.delete()
-
         # Attribut set qilamiz
         # 1 - attributes listini ichidagi har bitta dict(attrs1) birxil maxsulot bo'ladi
         # 2 - har bitta attrs bitta ProductAttribute obyekti bo'ladi

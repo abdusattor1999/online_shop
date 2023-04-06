@@ -19,6 +19,7 @@ class ChangePasswordSerializer(serializers.Serializer):
         katta = False
         kichik = False
         belgi = False
+        raqam = False
 
         new_pass = attrs['new_password']
         belgilar = ("." , "_" , "*" , "-" , "$" , "#")
@@ -29,10 +30,11 @@ class ChangePasswordSerializer(serializers.Serializer):
                 kichik = True
             elif i in belgilar:
                 belgi = True
-
+            elif 47 < ord(i) < 58:
+                raqam = True
         if len(new_pass) < 8:
             raise serializers.ValidationError({"success":False, "message":"Parol 8 ta raqamdan kam bo'lmasligi kerak"})
-        elif katta+kichik+belgi < 2:
+        elif katta+kichik+belgi+raqam < 2:
             raise serializers.ValidationError({"success":False, "message":f"Parol xavfsizlik talabiga javob bermaydi katta va kichik harflar yoki {belgilar} belgilaridan foydalaning"})
 
         return attrs
@@ -54,6 +56,7 @@ class SignupSerializer(serializers.ModelSerializer):
         katta = False
         kichik = False
         belgi = False
+        raqam = False
 
         new_pass = attrs['password']
         belgilar = ("." , "_" , "*" , "-" , "$" , "#")
@@ -64,10 +67,12 @@ class SignupSerializer(serializers.ModelSerializer):
                 kichik = True
             elif i in belgilar:
                 belgi = True
+            elif 47 < ord(i) < 58:
+                raqam = True
 
         if len(new_pass) < 8:
             raise serializers.ValidationError({"success":False, "message":"Parol 8 ta raqamdan kam bo'lmasligi kerak"})
-        elif katta+kichik+belgi < 2:
+        elif katta+kichik+belgi+raqam < 2:
             raise serializers.ValidationError({"success":False, "message":f"Parol xavfsizlik talabiga javob bermaydi katta va kichik harflar yoki {belgilar} belgilaridan foydalaning"})
 
         return attrs

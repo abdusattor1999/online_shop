@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView,ListAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from .serializer import ProductSerializer, UploadImageProductSerializer
+from .serializer import ProductSerializer, UploadImageProductSerializer, CategorySerializer
 from .models import ProductImage, ProductAttribute, Attribute, Product, UploadImageProduct, Category
 from seller.models import Seller
 
@@ -24,6 +24,35 @@ class UploadImagesAPI(CreateAPIView):
                 return Response({"success": False, "message": "So'rov tarkibida rasm yo'q"})
         except Exception as e:
             return Response({"success": False, "message": str(e.args)})
+
+class CategoryApi(ListCreateAPIView, RetrieveUpdateDestroyAPIView):
+    permission_classes = IsAuthenticated,
+    serializer_class = CategorySerializer
+    
+    def get_queryset(self, categ):
+        if categ:
+            jami_list = []
+            objects = Category.objects.filter(category_id=categ)
+            for i in objects:
+                jami_list.append(
+                    {
+                    "id":i.id,
+                    "name":i.name,
+                    "category_id":i.category.id,
+                    "icon":i.icon
+                    }
+                )
+            return jami_list
+        else:
+            return super().get_queryset()
+            
+
+    def get(self, request, *args, **kwargs):
+        categ_id = kwargs.get("pk", None)
+        if categ_id is not None:
+            return Response(self.get_queryset(categ_id))
+        return super().get(request, *args, **kwargs)
+  
 
 
 class ProductCrateAPI(ListCreateAPIView, ListAPIView):
@@ -114,7 +143,7 @@ class ProductEditDeleteAPI(RetrieveUpdateDestroyAPIView):
                     list_attrs = []
                     for one_attr in pr_atts:
                         attr_obs = Attribute.objects.filter(many_attributes=one_attr)
-                        listga_qosh = {}
+                        listga_qosh = {"id":one_attr.id}
                         # Bir ProductAttribut obyektiga tegishli hamma Attributlarni olamiz
                         for i in attr_obs:
                             listga_qosh[i.name] = i.value
@@ -144,6 +173,16 @@ class ProductEditDeleteAPI(RetrieveUpdateDestroyAPIView):
 
 
     def patch(self, request, *args, **kwargs):
+        # So'rov turlari:
+            # 1. productni o'zini malumotlarini o'zgartirish  ✔️
+            # 2. rasmni o'zgartirish ✔️
+            # 3. yangi rasm qo'shish ✔️
+            # 4. attributni inactive qilish
+            # 5. attributni o'chirish
+            # 6. maxsulotni qaysidur attributini sonini o'zgartirish
+            # 7. yangi attribut qo'shish
+            # 8. rasmni o'zgartirish
+
         product = Product.objects.get(id=kwargs['pk'])          
         attributes = self.request.data.pop("attributes", None)
         delete_old = self.request.data.pop("delete_old_attrs", None)
