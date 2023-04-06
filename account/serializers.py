@@ -21,7 +21,7 @@ class ChangePasswordSerializer(serializers.Serializer):
         belgi = False
 
         new_pass = attrs['new_password']
-        belgilar = [ "." , "_" , "*" , "-" , "$" , "#"]
+        belgilar = ("." , "_" , "*" , "-" , "$" , "#")
         for i in new_pass:
             if 64 < ord(i) < 91:
                 katta = True
@@ -49,6 +49,28 @@ class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", 'phone', 'password')
+
+    def validate(self, attrs): 
+        katta = False
+        kichik = False
+        belgi = False
+
+        new_pass = attrs['password']
+        belgilar = ("." , "_" , "*" , "-" , "$" , "#")
+        for i in new_pass:
+            if 64 < ord(i) < 91:
+                katta = True
+            elif 96 < ord(i) < 123:
+                kichik = True
+            elif i in belgilar:
+                belgi = True
+
+        if len(new_pass) < 8:
+            raise serializers.ValidationError({"success":False, "message":"Parol 8 ta raqamdan kam bo'lmasligi kerak"})
+        elif katta+kichik+belgi < 2:
+            raise serializers.ValidationError({"success":False, "message":f"Parol xavfsizlik talabiga javob bermaydi katta va kichik harflar yoki {belgilar} belgilaridan foydalaning"})
+
+        return attrs
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
