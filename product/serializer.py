@@ -1,4 +1,4 @@
-from .models import Product, UploadImageProduct, Category
+from .models import Product, UploadImageProduct, Category, ProductAttribute
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
@@ -20,7 +20,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=100, required=True)
     category = serializers.CharField(required=True)
-    seller_id = serializers.CharField(required=True)
+    seller = serializers.CharField(required=True)
     description = serializers.CharField(required=False)
     price = serializers.DecimalField(max_digits=12, decimal_places=2, required=True)
     discount = serializers.IntegerField(required=False)
@@ -31,6 +31,11 @@ class ProductSerializer(serializers.Serializer):
         model = Product
 
 
+
+class AttributeSerializer(serializers.Serializer):
+    class Meta:
+        model = ProductAttribute
+        fields = "__all__"
 
 
 

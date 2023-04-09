@@ -27,12 +27,26 @@ class Product(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def get_price(self):
-        if self.discount:
-            # price = {"old_price":self.price, "price" : (self.price / 100)*(100-self.discount)}   
+        if self.discount:  
             price = (self.price / 100)*(100-self.discount)
         else:
             price = self.price
         return price
+
+    
+
+    def set_properties(self, prop:dict):
+        product_fields = [f.name for f in self._meta.get_fields()]
+        a = self._meta.fields
+
+        for f_name, value in prop.items():
+            if f_name in product_fields:
+                print("Bor")
+                setattr(self, f_name, value)
+        self.save()
+
+        
+     
 
     def set_images(self, images:list, old=None):
             if old is not None:
@@ -67,16 +81,18 @@ class Product(models.Model):
         for attrs in attributes:
             quantity = attrs.pop("quantity", None)
             product_attr = ProductAttribute.objects.create(product=self)
-            
             for name, value in attrs.items():
                 attr = Attribute.objects.filter(name=name, value=value)
+                print(attr)
                 if attr.exists():
                     attr_one = attr.last()
+                    print("Attr_one", attr_one)
                 else:
                     attr_one = Attribute.objects.create(name=name, value=value)
                 product_attr.attribute.add(attr_one)
             product_attr.quantity = quantity
             product_attr.save()
+
             
 
 
