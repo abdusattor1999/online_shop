@@ -18,7 +18,8 @@ AUTH_USER_MODEL = 'account.User'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://olma.vercel.app"
+    "https://olma.vercel.app",
+    "https://seller-olma.vercel.app"
 ]
 
 ALLOWED_HOSTS = [
@@ -27,12 +28,13 @@ ALLOWED_HOSTS = [
     "127.0.0.1:8000",
     "127.0.0.1",
     "localhost",
-    "https://olma.vercel.app"
+    "https://olma.vercel.app",
+    "https://seller-olma.vercel.app"
 ]
 
 
 
-APPEND_SLASH=False
+APPEND_SLASH=True
 
 
 # Application definition
