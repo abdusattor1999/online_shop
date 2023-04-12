@@ -26,6 +26,16 @@ class Seller(models.Model):
             print("image setted from models")
             ShopPictures.objects.create(instance_id=self.id, image_id=image_id)
 
+    def get_image(self):
+        image_qs = ShopPictures.objects.filter(instance_id=self.id)
+        if image_qs.exists():
+            img = image_qs.last()
+            data = {"id":img.id, "url":img.url}
+        else:
+            data = None
+        return data
+
+
     def update(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)

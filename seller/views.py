@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, DestroyAPIView
+from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, DestroyAPIView
 from .models import Seller, ShopPictures
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -8,7 +8,7 @@ from account.models import UploadFile
 
 
 
-class SellerEditView(RetrieveUpdateDestroyAPIView):
+class SellerEditView(RetrieveUpdateDestroyAPIView, ListAPIView):
     serializer_class = SellerEditSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -16,6 +16,36 @@ class SellerEditView(RetrieveUpdateDestroyAPIView):
         user = self.request.user
         return Seller.objects.filter(user_id=user.id)
     
+    def self_query_set(self, pk=None):
+        spisok = []
+        if pk is not None:
+            seller = Seller.objects.filter(id=pk)
+        else:
+            seller = Seller.objects.all()
+        
+        if seller:
+            for sell in seller:
+                spisok.append(
+                    {
+                        "id":sell.id,
+                        "user_id":sell.user.id,
+                        "first_name":sell.first_name,
+                        "last_name":sell.last_name,
+                        "surname":sell.surname,
+                        "shop_name":sell.shop_name,
+                        "inn":sell.inn,
+                        "bank_mfo":sell.bank_mfo,
+                        "bank_account":sell.bank_account,
+                        "email":sell.email,
+                        "bio":sell.bio,
+                        "address":sell.address,
+                        "shop_picture":sell.get_image()
+                    }
+                )
+            return Response(spisok)
+        else:
+            return Response({"success":False, "message":"Bunday sotuvchi mavjud emas !"})
+
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -97,6 +127,8 @@ class SellerEditView(RetrieveUpdateDestroyAPIView):
         self.destroy(request, *args, **kwargs)
         return Response({"success":True, "message":"Do'kon o'chirish muvaffaqiyatli"})
 
+    def get(self, request, *args, **kwargs):
+        return self.self_query_set(kwargs.get('pk', None))
 
 
 

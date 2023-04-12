@@ -19,7 +19,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://olma.vercel.app",
-    "seller-olma.vercel.app ",
+    # "seller-olma.vercel.app",
     "https://seller-olma.vercel.app"
 ]
 
@@ -36,7 +36,7 @@ ALLOWED_HOSTS = [
 
 
 
-APPEND_SLASH=True
+APPEND_SLASH=False
 
 
 # Application definition
