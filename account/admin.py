@@ -4,7 +4,6 @@ from .forms import CustomUserCreationForm, CustomUserChangeForm
 from .models import User, Profile, Address, Cofirmation, ProfilePictures, UploadFile
 
 
-
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm

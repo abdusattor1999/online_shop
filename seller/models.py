@@ -21,9 +21,7 @@ class Seller(models.Model):
 
 
     def set_image(self, images:list):
-        # set image for user
         for image_id in images:
-            print("image setted from models")
             ShopPictures.objects.create(instance_id=self.id, image_id=image_id)
 
     def get_image(self):
@@ -36,8 +34,8 @@ class Seller(models.Model):
         return data
 
 
-    def update(self, **kwargs):
-        for key, value in kwargs.items():
+    def update(self, data):
+        for key, value in data.items():
             setattr(self, key, value)
         self.save()
 

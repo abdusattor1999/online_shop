@@ -195,7 +195,6 @@ class UserAPIView(generics.RetrieveUpdateDestroyAPIView):
             users = User.objects.all()
         user_list = []
         for user in users:
-            print(user)
             data = {
                 "id" : user.id,
                 "phone" : user.phone ,
@@ -321,9 +320,11 @@ class ResendCodeView(APIView):
 ####################   USER MODEL  ##################################
 
 
-class UploadImageApiView(CreateAPIView):
+class UploadImageApiView(CreateAPIView, generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = UploadImageSerializer
+    queryset = UploadFile.objects.all()
+    
 
     def post(self, request, *args, **kwargs):
         try:
@@ -331,7 +332,6 @@ class UploadImageApiView(CreateAPIView):
             return Response({"success": True, "message": "OK", "results": {"id": file.id, "url": file.url}})
         except Exception as e:
             return Response({"success": False, "message": str(e.args)}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class CreateProfileView(generics.ListCreateAPIView):

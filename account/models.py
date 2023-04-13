@@ -123,6 +123,7 @@ class UploadFile(models.Model):
     def __str__(self):
         return str(self.id)
     
+    
     @property
     def url(self):
         if self.file:
