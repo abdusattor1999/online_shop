@@ -188,25 +188,35 @@ class UserAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = DeleteUserSerilizer
     permission_classes = IsAuthenticated,
 
-    def get(self, request, *args, **kwargs):
-        user = User.objects.filter(id=kwargs["pk"]).last()
-        # user = self.request.user
-            
-        data = {
-            "id" : user.id,
-            "phone" : user.phone ,
-            "is_seller" : user.is_seller ,
-            "is_active" : user.is_active
-        }
-        
-        profile = Profile.objects.filter(user=user)
-        if profile.exists():
-            pr = profile.last()
-            data['profile'] = pr.id
+    def get_user_data(self, pk=False):
+        if pk:
+            users = User.objects.filter(id=pk)
+        else:
+            users = User.objects.all()
+        user_list = []
+        for user in users:
+            print(user)
+            data = {
+                "id" : user.id,
+                "phone" : user.phone ,
+                "is_seller" : user.is_seller ,
+                "is_active" : user.is_active
+            }
 
-        if user.is_seller==True:
-            data['seller'] = user.seller.id
-        return Response(data)
+            profile = Profile.objects.filter(user=user)
+            if profile.exists():
+                pr = profile.last()
+                data['profile'] = pr.id
+
+            if user.is_seller==True:
+                data['seller'] = user.seller.id
+            user_list.append(data)
+
+        return Response(user_list)
+    
+    def get(self, request, *args, **kwargs):
+        return self.get_user_data(kwargs.get("pk", False))
+
 
     def delete(self, request, *args, **kwargs):
         self.destroy(request, *args, **kwargs)

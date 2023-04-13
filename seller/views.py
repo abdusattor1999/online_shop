@@ -22,8 +22,8 @@ class SellerEditView(RetrieveUpdateDestroyAPIView, ListAPIView):
             seller = Seller.objects.filter(id=pk)
         else:
             seller = Seller.objects.all()
-        
-        if seller:
+         
+        if seller.exists():
             for sell in seller:
                 spisok.append(
                     {
@@ -52,8 +52,8 @@ class SellerEditView(RetrieveUpdateDestroyAPIView, ListAPIView):
         serializer.is_valid(raise_exception=True)
 
         # -------- Fields ----------------------------------------
-        image = self.request.data.get('shop_picture', None)
         user = self.request.user
+        image = self.request.data.get('images', None)
         first_name = self.request.data.get('first_name', None)
         last_name = self.request.data.get('last_name', None)
         surname = self.request.data.get('surname', None)
@@ -99,16 +99,11 @@ class SellerEditView(RetrieveUpdateDestroyAPIView, ListAPIView):
 
         if image is not None:
             validate_picture(picture=image)
-            is_images = True
-            print("image is not none from views 83")
             seller.set_image(image)
 
-        else:   
-            return Response({"success":False,"message":"Rasm yuklanmadi"})
-        
-        if is_images:
-                print("is_image = True from views 90")
-                seller.set_image(images=image)
+
+        # if is_images:
+        #         seller.set_image(images=image)
 
         data = {
             "success":True,
@@ -120,8 +115,8 @@ class SellerEditView(RetrieveUpdateDestroyAPIView, ListAPIView):
 
 
     def patch(self, request, *args, **kwargs):
-        self.partial_update(request, *args, **kwargs)
-        return Response({"success":True, "message":"Profil malumotlari yangilandi"})
+        super().partial_update(request, *args, **kwargs)
+        return Response({"success":True, "message":"Do'kon malumotlari yangilandi"})
 
     def delete(self, request, *args, **kwargs):     
         self.destroy(request, *args, **kwargs)

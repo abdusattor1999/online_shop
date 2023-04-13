@@ -18,6 +18,7 @@ urlpatterns = [
     path('change-phone/', ChangePhoneView.as_view(), name='change_phone'),
     path('change_password/', ChangePasswordView.as_view(), name='change_password'),
 
+    path('user/', UserAPIView.as_view(), name='user-get'),
     path('user/<int:pk>/', UserAPIView.as_view(), name='user-delete'),
     path("reset-password/", ResetPassRequestView.as_view(), name="request-reset-pass"),
     path("reset-verify/", VerifyView.as_view(), name="verify-reset-pass"),

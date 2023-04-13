@@ -34,6 +34,7 @@ class SellerEditSerializer(serializers.ModelSerializer):
         qs = Seller.objects.filter(email=attrs['email'])
         if qs.exists():
             return Response({"success":False, "message":"Bu Email oldin ro'yxatdan o'tgan boshqa pochta kiriting"})
+        
         return super().validate(attrs)
     
         

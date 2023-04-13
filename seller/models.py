@@ -1,7 +1,7 @@
 from django.db import models
 from account.models import User, UploadFile
 
-
+ 
 
 class Seller(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
