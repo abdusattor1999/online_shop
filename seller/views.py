@@ -118,8 +118,10 @@ class SellerEditView(RetrieveUpdateDestroyAPIView, ListAPIView):
         super().partial_update(request, *args, **kwargs)
         return Response({"success":True, "message":"Do'kon malumotlari yangilandi"})
 
-    def delete(self, request, *args, **kwargs):     
-        self.destroy(request, *args, **kwargs)
+    def delete(self, request, *args, **kwargs):
+        seller = Seller.objects.get(id=kwargs['pk'])
+        seller.delete()     
+        # self.destroy(request, *args, **kwargs)
         return Response({"success":True, "message":"Do'kon o'chirish muvaffaqiyatli"})
 
     def get(self, request, *args, **kwargs):
