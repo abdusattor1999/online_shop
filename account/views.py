@@ -209,8 +209,11 @@ class UserAPIView(generics.RetrieveUpdateDestroyAPIView):
 
             if user.is_seller==True:
                 data['seller'] = user.seller.id
-            user_list.append(data)
 
+            if pk:
+                return Response(data)
+            user_list.append(data)
+            
         return Response(user_list)
     
     def get(self, request, *args, **kwargs):
