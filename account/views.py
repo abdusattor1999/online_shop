@@ -212,9 +212,9 @@ class UserAPIView(generics.RetrieveUpdateDestroyAPIView):
 
             if pk:
                 return Response(data)
-            user_list.append(data)
-            
-        return Response(user_list)
+            else:
+                user_list.append(data)
+                return Response(user_list)
     
     def get(self, request, *args, **kwargs):
         return self.get_user_data(kwargs.get("pk", False))
@@ -483,12 +483,6 @@ class AddressAPIView(generics.RetrieveUpdateDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         self.destroy(request, *args, **kwargs)
         return Response({"success":True, "message":"Manzil o'chirish muvaffaqiyatli"})
-
-
-
-
-
-
 
 
 
