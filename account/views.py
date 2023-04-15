@@ -212,10 +212,8 @@ class UserAPIView(generics.RetrieveUpdateDestroyAPIView):
 
             user_list.append(data)
             
-        if pk:
-            return Response(user_list[0])
-        else:    
-            return Response(user_list)
+
+        return Response(user_list)
     
     def get(self, request, *args, **kwargs):
         return self.get_user_data(kwargs.get("pk", False))
