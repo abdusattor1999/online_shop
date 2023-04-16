@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-
+from .api import router
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -21,7 +21,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("account/", include('account.urls')),
     path("seller/", include('seller.urls')),
-    path("product/", include('product.urls')),
+    path("product/images/", include('product.urls')),
+    path("product/", include(router.urls)),
 ]
 
 urlpatterns += [

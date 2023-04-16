@@ -201,7 +201,6 @@ class UserAPIView(generics.RetrieveUpdateDestroyAPIView):
                 "is_seller" : user.is_seller ,
                 "is_active" : user.is_active
             }
-
             profile = Profile.objects.filter(user=user)
             if profile.exists():
                 pr = profile.last()
@@ -209,10 +208,8 @@ class UserAPIView(generics.RetrieveUpdateDestroyAPIView):
 
             if user.is_seller==True:
                 data['seller'] = user.seller.id
-
             user_list.append(data)
-            
-
+   
         return Response(user_list)
     
     def get(self, request, *args, **kwargs):

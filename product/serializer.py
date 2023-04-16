@@ -1,12 +1,12 @@
-from .models import Product, UploadImageProduct, Category, ProductAttribute
+from .models import Product, UploadImageProduct, Category, Attribute, AttributeValue
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
 
-class UploadImageProductSerializer(serializers.Serializer):
+class UploadImageProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = UploadImageProduct
-        fields = ("image")
+        fields = ("id", "image", 'url')
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,28 +17,24 @@ class CategorySerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class ProductSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=100, required=True)
-    category = serializers.CharField(required=True)
-    seller = serializers.CharField(required=True)
-    description = serializers.CharField(required=False)
-    price = serializers.DecimalField(max_digits=12, decimal_places=2, required=True)
-    discount = serializers.IntegerField(required=False)
-    images = serializers.ListField(required=True)
-    attributes = serializers.ListField(required=False)
+class AttributeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attribute
+        fields = ('id', "name", "status")
+
+class AttributeValueSer(serializers.ModelSerializer):
+    attribute = AttributeSerializer
+    class Meta:
+        model = AttributeValue
+        fields = ('__all__')
+
+class ProductSerializer(serializers.ModelSerializer):    
+    # attributes = AttributeValueSer(many=True)
+    category = CategorySerializer    # images = UploadImageProductSerializer    # Xatolik berdi : "Invalid pk \"8\" - object does not exist."
 
     class Meta:
         model = Product
-
-
-
-class AttributeSerializer(serializers.Serializer):
-    class Meta:
-        model = ProductAttribute
-        fields = "__all__"
-
-
-
+        fields = ('id', 'name', 'category', 'seller', 'description', "price", 'discount', "status")
 
 
 

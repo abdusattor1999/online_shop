@@ -21,9 +21,10 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="product_category")
     seller = models.ForeignKey('seller.Seller', on_delete=models.CASCADE)
     description = models.TextField(verbose_name="Ma'lumot", blank=True, null=True)
+    attributes = models.ManyToManyField('AttributeValue', blank=True)
     price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Narxi")
     discount = models.PositiveIntegerField(verbose_name="Chagirma (foizda)", blank=True, null=True)
-    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='active')
+    status = models.CharField(max_length=60, choices=STATUS_CHOICES, default='active')
     created = models.DateTimeField(auto_now_add=True)
 
     def get_price(self):
@@ -33,8 +34,6 @@ class Product(models.Model):
             price = self.price
         return price
 
-    
-
     def set_properties(self, prop:dict):
         product_fields = [f.name for f in self._meta.get_fields()]
         a = self._meta.fields
@@ -43,9 +42,7 @@ class Product(models.Model):
             if f_name in product_fields:
                 print("Bor")
                 setattr(self, f_name, value)
-        self.save()
-
-        
+        self.save()     
      
 
     def set_images(self, images:list, old=None):
@@ -65,36 +62,39 @@ class Product(models.Model):
                 else:
                     raise Response({"success": False, "message": "Bunday rasm mavjud emas"})
 
-    def set_attributes(self, attributes:list, old=None):
-        if old is not None:
-            old_attributes = ProductAttribute.objects.filter(product=self)
-            if old_attributes.exists():
-                for i in old_attributes:
-                    # ProductAttribute.objects.delete(id=i.id)
-                    i.delete()
-        # Attribut set qilamiz
-        # 1 - attributes listini ichidagi har bitta dict(attrs1) birxil maxsulot bo'ladi
-        # 2 - har bitta attrs bitta ProductAttribute obyekti bo'ladi
-        # 3 - attrs ni ichidagi har bitta dict bitta Attribute obyekti bo'ladi -> get_or_create
-        # 4 - attrs ni ichida quantity degan qiymat bo'ladi u ProductAttributega quantity sifatida beriladi
+    def get_images(self):
+        image_list = []
+        image_objects = ProductImage.objects.filter(inctance=self)
+        for img in image_objects:
+            image_list.append({"id":img.image.id, "url":img.image.url})
+        return image_list
+    
 
-        for attrs in attributes:
-            quantity = attrs.pop("quantity", None)
-            product_attr = ProductAttribute.objects.create(product=self)
-            for name, value in attrs.items():
-                attr = Attribute.objects.filter(name=name, value=value)
-                print(attr)
-                if attr.exists():
-                    attr_one = attr.last()
-                    print("Attr_one", attr_one)
-                else:
-                    attr_one = Attribute.objects.create(name=name, value=value)
-                product_attr.attribute.add(attr_one)
-            product_attr.quantity = quantity
-            product_attr.save()
-
+    def set_attributes(self, attrs):
+        for attr in attrs:
+            attribute = Attribute.objects.filter(name=attr['name'])
+            if attribute.exists():
+                attribute = attribute.last()
+            else:
+                attribute = Attribute.objects.create(name=attr['name'])
             
+            attribute_value = AttributeValue.objects.filter(attribute=attribute, value=attr['value'])
+            if attribute_value.exists():
+                attribute_value = attribute_value.last()
+            else:
+                attribute_value = AttributeValue.objects.create(attribute=attribute, value=attr['value'])
 
+            self.attributes.add(attribute_value)
+        self.save()
+    
+    def get_attributes(self):
+        attrs_list = []
+        product_atttributes = AttributeValue.objects.filter(product=self)
+        for one_attr in product_atttributes:
+            dicct = {one_attr.attribute.name:one_attr.value}
+            print(dicct)
+            attrs_list.append(dicct)
+        return attrs_list
 
     def __str__(self):
         return str(self.name)
@@ -121,20 +121,19 @@ class ProductImage(models.Model):
 
 class Attribute(models.Model):
     name = models.CharField(max_length=50)
-    value = models.CharField(max_length=50)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='active')
 
     def __str__(self):
-        return f"{self.name} ({self.value})"
+        return f"{self.name}"
+    
 
-class ProductAttribute(models.Model):
-    product = models.ForeignKey(Product, related_name="product_attributes", on_delete=models.CASCADE)
-    attribute = models.ManyToManyField(Attribute, blank=True, related_name="many_attributes")
-    quantity = models.PositiveIntegerField(verbose_name="Miqdori", blank=True, null=True)
+class AttributeValue(models.Model):
+    attribute = models.ForeignKey(Attribute,on_delete=models.CASCADE, blank=True, related_name="attributes")
+    value = models.CharField(max_length=30)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='active')
 
     def __str__(self):
-        return f"{self.product.name}"
+        return f"{self.value}"
 
 
 

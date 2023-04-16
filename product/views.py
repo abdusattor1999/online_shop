@@ -7,7 +7,7 @@ from .serializer import (
     CategorySerializer, 
     AttributeSerializer )
 from .models import (
-    ProductImage, ProductAttribute, 
+    ProductImage,# ProductAttribute, 
     Attribute, Product, 
     UploadImageProduct, Category )
 from seller.models import Seller
@@ -139,7 +139,7 @@ class ProductCrateAPI(ListCreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIVi
         images = request.data.pop("images", None)
         attributes = request.data.pop("attributes", None)
         category = request.data.pop("category", None)
-        get_categ = Category.objects.get_or_create(name=category.lower())[0]
+        get_categ = Category.objects.get_or_create(name=category.title())[0]
 
         seller_id = request.data.get("seller")
         seller = Seller.objects.filter(id=seller_id)
@@ -296,7 +296,7 @@ class ProductEditDeleteAPI(RetrieveUpdateDestroyAPIView, ListAPIView):
 class AttributeView(RetrieveUpdateDestroyAPIView):
     permission_classes = IsAuthenticated,
     serializer_class = AttributeSerializer
-    queryset = ProductAttribute.objects.all()
+    queryset = Attribute.objects.all()
 
     # 1. attributni inactive qilish ✔️
     # 2. attributni o'chirish ✔️
@@ -332,4 +332,40 @@ class AttributeView(RetrieveUpdateDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         super().destroy(request, *args, **kwargs)
         return Response({"success":True, "message":"Attribute deleted successfully"}) 
+##########################################################################################
+
+from rest_framework.viewsets import ModelViewSet
+class ProductViewSet(ModelViewSet):
+    permission_classes = IsAuthenticated,
+    serializer_class = ProductSerializer
+    queryset = Product.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        attributes = request.data.pop("attributes", False)
+        images = request.data.pop('images', False)
+
+        product = Product.objects.create(**serializer.validated_data)
+
+        if attributes:
+            print(attributes)
+            product.set_attributes(attributes)
+        if images:
+            print(images)
+            product.set_images(images)
+
+        return Response({"success":True, "message":"Maxsulot saqlandi", "id":product.id})
     
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+
+        data['images']=instance.get_images()
+        data['attributes']=instance.get_attributes()
+        return Response(data)
+    
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
