@@ -356,7 +356,7 @@ class ProductViewSet(ModelViewSet):
             product.set_images(images)
 
         return Response({"success":True, "message":"Maxsulot saqlandi", "id":product.id})
-    
+                                                        
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
