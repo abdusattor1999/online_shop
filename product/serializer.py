@@ -30,11 +30,12 @@ class AttributeValueSer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):    
     # attributes = AttributeValueSer(many=True)
-    category = CategorySerializer    # images = UploadImageProductSerializer    # Xatolik berdi : "Invalid pk \"8\" - object does not exist."
+    category = CategorySerializer    
+    # images = UploadImageProductSerializer    # Xatolik berdi : "Invalid pk \"8\" - object does not exist."
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'category', 'seller', 'description', "price", 'discount', "status")
+        fields = ('id', 'name', 'category', 'seller', 'description', "price", 'discount', "status", "view")
 
 
 

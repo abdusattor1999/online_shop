@@ -9,7 +9,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
-
 class Address(models.Model):
     profile = models.ForeignKey('account.Profile', on_delete=models.CASCADE)
     title = models.CharField(max_length=100, verbose_name='Manzil sarlavhasi', blank=True, null=True)
@@ -55,7 +54,6 @@ class User(AbstractBaseUser,PermissionsMixin):
 
 
 class Cofirmation(models.Model):
-
     TYPE_CHOCES = (
         ("register","register"),
         ("resend","resend"),

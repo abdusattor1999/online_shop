@@ -174,11 +174,11 @@ class ProfilePicSerializer(serializers.ModelSerializer):
 
 
 class CreateProfileSerializer(serializers.ModelSerializer):
-    
+    # user = SignupSerializer
     class Meta:
         model = Profile
         fields = ("id","first_name","last_name", "photo", "email")
-
+# "user"
 #------------- Address --------------------------------------------------------------
 
 class AddressSerializer(serializers.ModelSerializer):

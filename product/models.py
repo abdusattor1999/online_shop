@@ -25,6 +25,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Narxi")
     discount = models.PositiveIntegerField(verbose_name="Chagirma (foizda)", blank=True, null=True)
     status = models.CharField(max_length=60, choices=STATUS_CHOICES, default='active')
+    view = models.PositiveIntegerField(default=0, verbose_name="Ko'rishlar soni")
     created = models.DateTimeField(auto_now_add=True)
 
     def get_price(self):
@@ -45,8 +46,8 @@ class Product(models.Model):
         self.save()     
      
 
-    def set_images(self, images:list, old=None):
-            if old is not None:
+    def set_images(self, images:list, old=True):# old=None
+            if old: # is not None
                 old_images = ProductImage.objects.filter(inctance_id=self.id)
                 if old_images.exists():
                     for img in old_images:
@@ -70,19 +71,26 @@ class Product(models.Model):
         return image_list
     
 
-    def set_attributes(self, attrs):
+    def set_attributes(self, attrs, old=False):
+        # self inctanse manda Product obyekti
+        old_attrs1 = Product.objects.prefetch_related('attributes').all()  # 1-variant
+        old_attrs2 = Product.objects.select_related('category').last()     # 2-variant
+
+        print("OLd 1",old_attrs1)
+        print("Old 2",type(old_attrs2))
+    
         for attr in attrs:
-            attribute = Attribute.objects.filter(name=attr['name'])
+            attribute = Attribute.objects.filter(name=attr['name'], status='active')
             if attribute.exists():
                 attribute = attribute.last()
             else:
-                attribute = Attribute.objects.create(name=attr['name'])
+                attribute = Attribute.objects.create(name=attr['name'], status='active')
             
-            attribute_value = AttributeValue.objects.filter(attribute=attribute, value=attr['value'])
+            attribute_value = AttributeValue.objects.filter(attribute=attribute, value=attr['value'], status='active')
             if attribute_value.exists():
                 attribute_value = attribute_value.last()
             else:
-                attribute_value = AttributeValue.objects.create(attribute=attribute, value=attr['value'])
+                attribute_value = AttributeValue.objects.create(attribute=attribute, value=attr['value'], status='active')
 
             self.attributes.add(attribute_value)
         self.save()
@@ -97,7 +105,7 @@ class Product(models.Model):
         return attrs_list
 
     def __str__(self):
-        return str(self.name)
+        return self.name
 
 class UploadImageProduct(models.Model):
     image = models.FileField(upload_to="product_images/") 
