@@ -76,6 +76,8 @@ class Product(models.Model):
         old_attrs1 = Product.objects.prefetch_related('attributes').all()  # 1-variant
         old_attrs2 = Product.objects.select_related('category').last()     # 2-variant
 
+
+
         print("OLd 1",old_attrs1)
         print("Old 2",type(old_attrs2))
     
@@ -99,7 +101,11 @@ class Product(models.Model):
         attrs_list = []
         product_atttributes = AttributeValue.objects.filter(product=self)
         for one_attr in product_atttributes:
-            dicct = {one_attr.attribute.name:one_attr.value}
+            dicct = {
+                "id" : one_attr.id,
+                "name" : one_attr.attribute.name,
+                "value": one_attr.value
+                }
             print(dicct)
             attrs_list.append(dicct)
         return attrs_list

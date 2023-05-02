@@ -335,7 +335,6 @@ class AttributeView(RetrieveUpdateDestroyAPIView):
 ##########################################################################################
 
 from rest_framework.viewsets import ModelViewSet
-
 class ProductViewSet(ModelViewSet):
     permission_classes = IsAuthenticated,
     serializer_class = ProductSerializer
@@ -372,16 +371,16 @@ class ProductViewSet(ModelViewSet):
 
         return Response(data)
     
-    def partial_update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        images = request.data.pop('images', False)
-        attributes = request.data.pop("attributes", False)
-        product = Product.objects.get(id=kwargs['pk'])
 
-        if images:
-            product.set_images(images)
-        if attributes:
-            product.set_attributes(attributes)
+    # def partial_update(self, request, *args, **kwargs):
+    #     kwargs['partial'] = True
+    #     images = request.data.pop('images', False)
+    #     # attributes = request.data.pop("attributes", False)
+    #     product = Product.objects.get(id=kwargs['pk'])
 
-        self.update(request, *args, **kwargs)
-        return Response({"success":True, "message":"Informations have been updated."})
+
+    #     # if attributes:
+    #     #     product.set_attributes(attributes)
+
+    #     self.update(request, *args, **kwargs)
+    #     return Response({"success":True, "message":"Product informations have been updated."})

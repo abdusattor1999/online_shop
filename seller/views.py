@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from .serializer import SellerEditSerializer
 from account.models import UploadFile
 
-
+from django.http.response import HttpResponse
 
 class SellerEditView(RetrieveUpdateDestroyAPIView, ListAPIView):
     serializer_class = SellerEditSerializer

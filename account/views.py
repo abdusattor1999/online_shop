@@ -190,7 +190,24 @@ class UserAPIView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_user_data(self, pk=False):
         if pk:
-            users = User.objects.filter(id=pk)
+            user = User.objects.filter(id=pk).last()
+            data = {
+                "id" : user.id,
+                "phone" : user.phone ,
+                "is_seller" : user.is_seller ,
+                "is_active" : user.is_active
+            }
+            profile = Profile.objects.filter(user=user)
+            if profile.exists():
+                pr = profile.last()
+                data['profile'] = pr.id
+
+            if user.is_seller==True:
+                data['seller'] = user.seller.id
+            
+            return Response(data)
+            
+
         else:
             users = User.objects.all()
         user_list = []
