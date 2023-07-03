@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 
 from .views import (
     UploadImagesAPI, CategoryApi,
-    AttributeView , ProductViewSet )
+    AttributeView , ProductViewSet, CategoryViewSet )
 
    
 urlpatterns = [
@@ -13,8 +13,9 @@ urlpatterns = [
     # path("", ProductCrateAPI.as_view(), name='create'),
     # path("<int:pk>/", ProductCrateAPI.as_view(), name='get'),
     # path("<int:product>/<int:pk>/", AttributeView.as_view(), name='attribute'),
-    path("categories/", CategoryApi.as_view(), name="category"),
-    path("categories/<int:pk>/", CategoryApi.as_view(), name="category"),
+    # path("categories/", CategoryApi.as_view(), name="category"),  
+    path("categories/", CategoryViewSet.as_view({'post':"create", 'get':"list"}), name="category"),
+    # path("categories/<int:pk>/", CategoryApi.as_view(), name="category"),
     # path("category/<int:category>/", ProductCrateAPI.as_view(), name='get_by_category'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

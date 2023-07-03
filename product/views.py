@@ -333,29 +333,37 @@ class AttributeView(RetrieveUpdateDestroyAPIView):
         super().destroy(request, *args, **kwargs)
         return Response({"success":True, "message":"Attribute deleted successfully"}) 
 ##########################################################################################
-
 from rest_framework.viewsets import ModelViewSet
+
+class CategoryViewSet(ModelViewSet):
+    permission_classes = IsAuthenticated,
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
 class ProductViewSet(ModelViewSet):
     permission_classes = IsAuthenticated,
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        attributes = request.data.pop("attributes", False)
-        images = request.data.pop('images', False)
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.serializer_class(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     attributes = request.data.pop("attributes", False)
+    #     images = request.data.pop('images', False)
 
-        product = Product.objects.create(**serializer.validated_data)
+    #     product = Product.objects.create(**serializer.validated_data)
 
-        if attributes:
-            print(attributes)
-            product.set_attributes(attributes)
-        if images:
-            print(images)
-            product.set_images(images)
+    #     if attributes:
+    #         print("Buyer ViewSet views:360",attributes)
+    #         product.set_attributes(attributes)
+    #     if images:
+    #         print(images)
+    #         product.set_images(images)
 
-        return Response({"success":True, "message":"Maxsulot saqlandi", "id":product.id})
+    #     return Response({"success":True, "message":"Maxsulot saqlandi", "id":product.id})
                                                         
 
     def retrieve(self, request, *args, **kwargs):

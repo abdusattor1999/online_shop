@@ -117,7 +117,6 @@ class SellerEditView(RetrieveUpdateDestroyAPIView, ListAPIView):
     def patch(self, request, *args, **kwargs):
         seller = Seller.objects.get(id=kwargs['pk'])
         images = request.data.pop("images", None)
-        images = request.data.pop("images", None)
         if images is not None:
             seller.set_image(images)
         seller.update(request.data)
